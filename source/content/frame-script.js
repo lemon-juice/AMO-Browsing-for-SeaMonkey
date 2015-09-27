@@ -140,7 +140,7 @@ var amoBr = {
 		  infoElem.style.maxWidth = '400px';
 		}
 		
-		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If you are redirected back to this page after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
+		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If the download button does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
 		+ "<p style='font-size: 10pt; text-align: left'><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
 		
 		hugeButton.parentNode.appendChild(infoElem);

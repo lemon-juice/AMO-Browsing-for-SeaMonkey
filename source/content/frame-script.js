@@ -40,6 +40,9 @@ var amoBr = {
 	  
 	} else if (app == 'firefox') {
 	  this._modifyFirefoxPage();
+	  
+	} else if (this._isListingPage()) {
+	  this._modifyListing();
 	}
   },
   
@@ -140,10 +143,35 @@ var amoBr = {
 		  infoElem.style.maxWidth = '400px';
 		}
 		
-		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If the download button does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
+		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If the download button does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all converted extensions will work properly in SeaMonkey!</p>"
 		+ "<p style='font-size: 10pt; text-align: left'><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
 		
 		hugeButton.parentNode.appendChild(infoElem);
+	  }
+	}
+  },
+  
+  _modifyListing: function() {
+	var items = content.document.querySelectorAll('div.listing > div.items > div.item.incompatible');
+	
+	for (var i=0; i<items.length; i++) {
+	  var item = items[i];
+	  item.classList.remove('incompatible');
+	  
+	  var action = item.querySelector('div.action');
+	  
+	  if (action) {
+		var div = content.document.createElement('div');
+		div.style.maxWidth = '200px';
+		div.style.color = '#999';
+		div.style.paddingLeft = '20px';
+		div.style.fontSize = '8pt';
+		div.style.textAlign = 'center';
+		div.style.lineHeight = '1.4';
+		div.textContent = "See add-on page for SeaMonkey compatibility information.";
+		
+		action.textContent = '';
+		action.appendChild(div);
 	  }
 	}
   },
@@ -182,6 +210,7 @@ var amoBr = {
 	return data;
   },
   
+  // Return the name of application of add-on page. NULL if not add-on page.
   _getPageApp: function() {
 	var body = content.document.body;
 	
@@ -217,6 +246,12 @@ var amoBr = {
 	}
 	
 	return null;
+  },
+  
+  _isListingPage: function() {
+	var body = content.document.body;
+	
+	return body && body.classList.contains('extensions');
   }
 
 }

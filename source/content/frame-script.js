@@ -96,8 +96,18 @@ var amoBr = {
   },
   
   _modifyFirefoxPage: function() {
+	var isContribPage = false;
+	
 	// sometimes there may be 3 huge buttons, each for different OS
 	var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.concealed.CTA');
+	
+	if (hugeButtons.length == 0) {
+	  hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.concealed.CTA');
+	  
+	  if (hugeButtons.length > 0) {
+		isContribPage = true;
+	  }
+	}
 	
 	if (hugeButtons.length > 0) {
 	  for (var i=0; i<hugeButtons.length; i++) {
@@ -114,15 +124,20 @@ var amoBr = {
 		hugeButton.classList.remove('CTA');
 		hugeButton.style.display = 'inline-block';
 		hugeButton.textContent = "Check if SeaMonkey version is available";
-		hugeButton.href = content.location.href.replace('/firefox/addon/', '/seamonkey/addon/');
+		hugeButton.href = this._convertURLToSM(content.location.href);
 		
-	  var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
+		var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
 		
 		var infoElem = content.document.createElement('div');
 		infoElem.style.marginBottom = '1em';
 		
-	  infoElem.innerHTML = "<p>If you are redirected back to this page after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
-		+ "<p><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
+		if (isContribPage) {
+		  infoElem.style.marginTop = '0.5em';
+		  infoElem.style.maxWidth = '400px';
+		}
+		
+		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If you are redirected back to this page after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
+		+ "<p style='font-size: 10pt; text-align: left'><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
 		
 		hugeButton.parentNode.appendChild(infoElem);
 	  }
@@ -133,6 +148,19 @@ var amoBr = {
 	var newElem = elem.cloneNode(true);
 	elem.parentNode.replaceChild(newElem, elem);
 	return newElem;
+  },
+  
+  // Convert URL of Fx addon page to SM addon page
+  _convertURLToSM: function(url) {
+	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
+	
+	var segm = url.split('/contribute/roadblock/');
+	if (segm.length > 0) {
+	  // this is URL of contribution page - change to main addon page
+	  url = segm[0] + '/';
+	}
+	
+	return url;
   },
   
   _getCompatData: function() {
@@ -157,7 +185,12 @@ var amoBr = {
 	  return null;
 	}
 	
-	if (!body.classList.contains('addon-details')) {
+	var isAddonPage = (body.classList.contains('addon-details')
+		|| (body.classList.contains('meet')
+		    && !body.classList.contains('profile'))
+		);
+	
+	if (!isAddonPage) {
 	  return null;
 	}
 	

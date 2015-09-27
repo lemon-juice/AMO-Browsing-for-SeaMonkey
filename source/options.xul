@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <setting type="bool" pref="extensions.standaloneMail.useDefaultBrowser" id="pref_useDefaultBrowser" title="Use system default browser" />
+  <setting type="file" pref="extensions.standaloneMail.exePath" id="pref_exePath" title="Location of external browser executable file" />
+  <setting type="string" pref="extensions.standaloneMail.exeParam1" id="pref_exeParam1" title="Command line param 1 (optional)" />
+  <setting type="string" pref="extensions.standaloneMail.exeParam2" id="pref_exeParam2" title="Command line param 2 (optional)" />
+  <setting type="bool" pref="extensions.standaloneMail.middleClick" title="Open links in external browser on middle click from Mail and Browser windows" />
+</vbox>

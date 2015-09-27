@@ -1,0 +1,20 @@
+<div class="install-wrapper ">
+<div class="install-shell">
+<div data-version-supported="false" class="install  clickHijack" data-addon="5648" data-icon="https://addons.cdn.mozilla.net/user-media/addon_icons/5/5648-32.png?modified=1443000728" data-developers="/en-US/seamonkey/addon/fireshot/developers" data-versions="/en-US/seamonkey/addon/5648/versions/" data-name="Full Web Page Screenshots (?????)" data-after="contrib" data-min="2.1" data-max="2.33.*" data-is-compatible="false" data-is-compatible-app="true" data-compat-overrides="[]">
+  <p class="install-button">
+                            <a class="button  prominent  add concealed" data-hash="sha256:c033b82bb6c9739f1f047161e439d289fa7ae4857041b7bad47cb1d2134d2c4a" href="/seamonkey/downloads/latest/5648/addon-5648-latest.xpi?src=dp-btn-primary">
+      <b></b>
+    <span>Add to SeaMonkey</span>
+  </a>
+      </p>
+</div> 
+    
+  
+      <div style="width: 300px;" class="d2c-reasons-popup popup">
+      <p>This add-on is not compatible with your version of SeaMonkey because of the following:</p>
+      <ul><li>Add-on has opted into strict compatibility checking.</li></ul>
+    </div>
+  <p>
+    <a id="downloadAnyway" hidden="true">Download Anyway</a>
+</p>
+<div class="extra"><span class="notavail">Not available for SeaMonkey 2.38<span><a class="d2c-reasons-help" href="#">?</a></span></span></div></div> </div>

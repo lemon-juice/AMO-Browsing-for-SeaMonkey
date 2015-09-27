@@ -96,23 +96,36 @@ var amoBr = {
   },
   
   _modifyFirefoxPage: function() {
-	var hugeButton = content.document.querySelector('p.install-button a.button.download.concealed.CTA');
+	// sometimes there may be 3 huge buttons, each for different OS
+	var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.concealed.CTA');
 	
-	if (hugeButton) {
-	  hugeButton.classList.remove('concealed');
-	  hugeButton.classList.remove('CTA');
-	  hugeButton.textContent = "Check if SeaMonkey version is available";
-	  hugeButton.href = content.location.href.replace('/firefox/addon/', '/seamonkey/addon/');
-	  
+	if (hugeButtons.length > 0) {
+	  for (var i=0; i<hugeButtons.length; i++) {
+		var hugeButton = hugeButtons[i];
+		
+		var display = content.getComputedStyle(hugeButton, '').getPropertyValue('display');
+		
+		if (display == 'none') {
+		  // hidden button for other OS
+		  continue;
+		}
+		
+		hugeButton.classList.remove('concealed');
+		hugeButton.classList.remove('CTA');
+		hugeButton.style.display = 'inline-block';
+		hugeButton.textContent = "Check if SeaMonkey version is available";
+		hugeButton.href = content.location.href.replace('/firefox/addon/', '/seamonkey/addon/');
+		
 	  var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
-	  
-	  var infoElem = content.document.createElement('div');
-	  infoElem.style.marginBottom = '1em';
-	  
+		
+		var infoElem = content.document.createElement('div');
+		infoElem.style.marginBottom = '1em';
+		
 	  infoElem.innerHTML = "<p>If you are redirected back to this page after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all extensions will work properly in SeaMonkey!</p>"
-	  + "<p><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
-	  
-	  hugeButton.parentNode.appendChild(infoElem);
+		+ "<p><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
+		
+		hugeButton.parentNode.appendChild(infoElem);
+	  }
 	}
   },
   

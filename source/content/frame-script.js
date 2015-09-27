@@ -49,7 +49,11 @@ var amoBr = {
 	if (button) {
 	  button = this._removeEvents(button);
 	  button.classList.remove('concealed');
-	  button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
+	  
+	  if (!button.classList.contains('caution')) {
+		// not preliminarily reviewed
+		button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
+	  }
 	  
 	  var compatData = this._getCompatData();
 	  var alertElem = content.document.querySelector('div.extra span.notavail');
@@ -67,7 +71,7 @@ var amoBr = {
 		// add-on is compatible, only maxVersion is too low
 		if (compatData.maxVersion) {
 		  info = "Maximum officially supported SeaMonkey version for this add-on is " + compatData.maxVersion + ". "
-		  + "However, it is very likely it will work fine also in newer versions.";
+		  + "However, it is very likely it will work fine also in newer SeaMonkey versions.";
 		  
 		}
 		

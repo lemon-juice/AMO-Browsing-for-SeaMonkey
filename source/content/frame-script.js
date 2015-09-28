@@ -9,7 +9,7 @@ var amoBr = {
 	addMessageListener("AMOBrowsing:removeEvents", this);
   },
   
-    /* Receiving message from addMessageListener */
+  /* Receiving message from addMessageListener */
   receiveMessage: function(aMsg) {
     switch (aMsg.name) {
       case "AMOBrowsing:removeEvents": this.removeEvents(); break;
@@ -33,20 +33,21 @@ var amoBr = {
 	  return;
 	}
 	
-	var app = this._getPageApp();
+	var app = this.getPageApp();
 	
 	if (app == 'seamonkey') {
-	  this._modifySeaMonkeyPage();
+	  this.modifySeaMonkeyPage();
 	  
 	} else if (app == 'firefox') {
-	  this._modifyFirefoxPage();
+	  this.modifyFirefoxPage();
 	  
-	} else if (this._isListingPage()) {
-	  this._modifyListing();
+	} else if (this.isListingPage()) {
+	  this.modifyListing();
 	}
   },
   
-  _modifySeaMonkeyPage: function() {
+  /* Modify SeaMonkey add-on page */
+  modifySeaMonkeyPage: function() {
 	var buttons = content.document.querySelectorAll('p.install-button a.button.add.concealed');
 	var button;
 	
@@ -63,7 +64,7 @@ var amoBr = {
 	}
 	
 	if (button) {
-	  button = this._removeEvents(button);
+	  button = this.removeEventsFromElem(button);
 	  button.classList.remove('concealed');
 	  
 	  if (!button.classList.contains('caution')) {
@@ -71,7 +72,7 @@ var amoBr = {
 		button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
 	  }
 	  
-	  var compatData = this._getCompatData();
+	  var compatData = this.getCompatData();
 	  var alertElem = content.document.querySelector('div.extra span.notavail');
 	  
 	  if (alertElem) {
@@ -115,7 +116,8 @@ var amoBr = {
 	}
   },
   
-  _modifyFirefoxPage: function() {
+  /* Modify Firefox add-on page */
+  modifyFirefoxPage: function() {
 	var isContribPage = false;
 	
 	// sometimes there may be 3 huge buttons, each for different OS
@@ -164,7 +166,8 @@ var amoBr = {
 	}
   },
   
-  _modifyListing: function() {
+  /* Modify add-on listing page, e.g. "Up & Coming Extensions" */
+  modifyListing: function() {
 	var items = content.document.querySelectorAll('div.listing > div.items > div.item.incompatible');
 	
 	for (var i=0; i<items.length; i++) {
@@ -189,13 +192,13 @@ var amoBr = {
 	}
   },
   
-  _removeEvents: function(elem) {
+  removeEventsFromElem: function(elem) {
 	var newElem = elem.cloneNode(true);
 	elem.parentNode.replaceChild(newElem, elem);
 	return newElem;
   },
   
-  // Convert URL of Fx addon page to SM addon page
+  /* Convert URL of Fx addon page to SM addon page */
   _convertURLToSM: function(url) {
 	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
 	
@@ -208,7 +211,8 @@ var amoBr = {
 	return url;
   },
   
-  _getCompatData: function() {
+  /* Get add-on compatibility data from certain elements on page */
+  getCompatData: function() {
 	var dataElem = content.document.querySelector('div.install-shell div.install');
 	
 	if (!dataElem) {
@@ -223,8 +227,8 @@ var amoBr = {
 	return data;
   },
   
-  // Return the name of application of add-on page. NULL if not add-on page.
-  _getPageApp: function() {
+  /* Get the name of application of add-on page. NULL if not add-on page. */
+  getPageApp: function() {
 	var body = content.document.body;
 	
 	if (!body) {
@@ -232,7 +236,7 @@ var amoBr = {
 	}
 	
 	var isAddonPage = (body.classList.contains('addon-details')
-		|| (body.classList.contains('meet')
+		|| (body.classList.contains('meet')  // also include contribution download page
 		    && !body.classList.contains('profile'))
 		);
 	
@@ -261,7 +265,8 @@ var amoBr = {
 	return null;
   },
   
-  _isListingPage: function() {
+  /* Check if add-ons listing page is loaded */
+  isListingPage: function() {
 	var body = content.document.body;
 	
 	return body && body.classList.contains('extensions');

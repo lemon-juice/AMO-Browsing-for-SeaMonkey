@@ -47,7 +47,20 @@ var amoBr = {
   },
   
   _modifySeaMonkeyPage: function() {
-	var button = content.document.querySelector('p.install-button a.button.add.concealed');
+	var buttons = content.document.querySelectorAll('p.install-button a.button.add.concealed');
+	var button;
+	
+	for (var i=0; i<buttons.length; i++) {
+	  var b = buttons[i];
+	  
+	  var display = content.getComputedStyle(b, '').getPropertyValue('display');
+	  
+	  if (display != 'none') {
+		// visible button
+		button = b;
+		break;
+	  }
+	}
 	
 	if (button) {
 	  button = this._removeEvents(button);

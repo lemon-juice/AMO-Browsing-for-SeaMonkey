@@ -46,6 +46,15 @@ var amoBr = {
 	}
 	
 	this.modifyHoverCards();
+	
+	if (app == 'seamonkey') { // SM add-on page
+	  
+	  var target = content.document.getElementById('page');
+	  
+	  if (target) {
+		this.addHoverCardObserver(target);
+	  }
+	}
   },
   
   /* Modify SeaMonkey add-on page */
@@ -215,6 +224,36 @@ var amoBr = {
 		}
 	  }
 	}
+  },
+  
+  /* Invoke modifyHoverCards() when "Often used with..." and "Other add-ons by these authors"
+   * panels are injected into page by AMO ajax
+   */
+  addHoverCardObserver: function(target) {
+	var observer = new content.MutationObserver(function(mutations) {
+	  
+	  mutationsLoop:
+	  for (var m=0; m<mutations.length; m++) {
+		var mutation = mutations[m];
+		
+		if (mutation.type == 'childList') {
+		  
+		  for (var i=0; i<mutation.addedNodes.length; i++) {
+			var node = mutation.addedNodes[i];
+			
+			if (node.nodeName == 'SECTION'
+				&& node.classList.contains('primary')
+				&& node.querySelector('#recommendations-grid, #author-addons')) {
+			  observer.disconnect();
+			  content.setTimeout(amoBr.modifyHoverCards, 0);
+			  break mutationsLoop;
+			}
+		  }
+		}
+	  }    
+	});
+	
+	observer.observe(target, { attributes: true, childList: true, characterData: true, subtree: true });
   },
   
   removeEventsFromElem: function(elem) {

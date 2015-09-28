@@ -55,6 +55,8 @@ var amoBr = {
 		this.addHoverCardObserver(target);
 	  }
 	}
+	
+	this.modifyCollectionListing();
   },
   
   /* Modify SeaMonkey add-on page */
@@ -65,9 +67,7 @@ var amoBr = {
 	for (var i=0; i<buttons.length; i++) {
 	  var b = buttons[i];
 	  
-	  var display = content.getComputedStyle(b, '').getPropertyValue('display');
-	  
-	  if (display != 'none') {
+	  if (!this.isElementHidden(b)) {
 		// visible button
 		button = b;
 		break;
@@ -99,7 +99,7 @@ var amoBr = {
 		// add-on is compatible, only maxVersion is too low
 		if (compatData.maxVersion) {
 		  info = "Maximum officially supported SeaMonkey version for this add-on is " + compatData.maxVersion + ". "
-		  + "However, it is very likely it will work fine also in newer SeaMonkey versions.";
+		  + "However, it is likely it will work fine also in newer SeaMonkey versions.";
 		  
 		}
 		
@@ -199,6 +199,60 @@ var amoBr = {
 		
 		action.textContent = '';
 		action.appendChild(div);
+	  }
+	}
+  },
+  
+  modifyCollectionListing: function() {
+	var items = content.document.querySelectorAll('div.primary div.separated-listing div.item');
+	
+	for (var i=0; i<items.length; i++) {
+	  var item = items[i];
+	  var link = item.querySelector('h3 a');
+	  var linkButtons = item.querySelectorAll('p.install-button a.button.concealed.CTA');
+	  
+	  if (link && linkButtons.length > 0) {
+		for (var j=0; j<linkButtons.length; j++) {
+		  var linkButton = linkButtons[j];
+		  
+		  if (this.isElementHidden(linkButton)) {
+			continue;
+		  }
+		  
+		  // replace "Only with Firefox — Get Firefox Now!"
+		  linkButton.textContent = "Check if SeaMonkey version is available";
+		  linkButton.className = ''; // class 'button' prevents link from working
+		  linkButton.href = this.convertURLToSM(link.href);
+		  linkButton.style.whiteSpace = 'normal';
+		  linkButton.style.padding = '0.3em';
+		  linkButton.style.display = 'inline-block';
+		}
+		
+	  } else if (item.querySelector('div.install-shell div[data-version-supported=false]')) {
+		// version unsupported according to AMO
+		var span = item.querySelector('div.install-shell span.notavail');
+		
+		if (span) {
+		  span.style.background = 'none';
+		  span.style.paddingLeft = '0';
+		  span.style.fontWeight = 'normal';
+		  span.style.whiteSpace = 'normal';
+		  span.textContent = "Visit add-on page for SeaMonkey compatibility information.";
+		  span.parentNode.style.lineHeight = '1.3';
+		}
+		
+	  }
+	  
+	  // fix AMO bug - "Continue to Download" for contribution add-ons is blocked
+	  // by 'button' class
+	  var linkButtons = item.querySelectorAll('p.install-button a.button.contrib.go');
+	  
+	  for (var j=0; j<linkButtons.length; j++) {
+		var linkButton = linkButtons[j];
+		linkButton.className = ''; // class 'button' prevents link from working
+		linkButton.style.whiteSpace = 'normal';
+		linkButton.style.padding = '0.3em';
+		linkButton.style.display = 'inline-block';
 	  }
 	}
   },
@@ -334,6 +388,11 @@ var amoBr = {
 	var body = content.document.body;
 	
 	return body && body.classList.contains('extensions');
+  },
+  
+  isElementHidden: function(elem) {
+	var display = content.getComputedStyle(elem, '').getPropertyValue('display');
+	return (display == 'none' || elem.getAttribute('hidden'));
   }
 
 }

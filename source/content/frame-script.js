@@ -200,7 +200,7 @@ var amoBr = {
 	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
 	
 	var segm = url.split('/contribute/roadblock/');
-	if (segm.length > 0) {
+	if (segm.length > 1) {
 	  // this is URL of contribution page - change to main addon page
 	  url = segm[0] + '/';
 	}

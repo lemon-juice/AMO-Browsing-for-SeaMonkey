@@ -44,6 +44,8 @@ var amoBr = {
 	} else if (this.isListingPage()) {
 	  this.modifyListing();
 	}
+	
+	this.modifyHoverCards();
   },
   
   /* Modify SeaMonkey add-on page */
@@ -146,7 +148,7 @@ var amoBr = {
 		hugeButton.classList.remove('CTA');
 		hugeButton.style.display = 'inline-block';
 		hugeButton.textContent = "Check if SeaMonkey version is available";
-		hugeButton.href = this._convertURLToSM(content.location.href);
+		hugeButton.href = this.convertURLToSM(content.location.href);
 		
 		var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
 		
@@ -184,10 +186,33 @@ var amoBr = {
 		div.style.fontSize = '8pt';
 		div.style.textAlign = 'center';
 		div.style.lineHeight = '1.4';
-		div.textContent = "See add-on page for SeaMonkey compatibility information.";
+		div.textContent = "Visit add-on page for SeaMonkey compatibility information.";
 		
 		action.textContent = '';
 		action.appendChild(div);
+	  }
+	}
+  },
+  
+  /* Modify hover cards - mouseover popups with add-ons like those on
+   * AMO home page
+   */
+  modifyHoverCards: function() {
+	var hcards = content.document.querySelectorAll('div.addon.hovercard');
+	
+	for (var i=0; i<hcards.length; i++) {
+	  var hcard = hcards[i];
+	  
+	  if (hcard.querySelector('div.install-shell div[data-version-supported=false]')) {
+		// version unsupported according to AMO
+		var span = hcard.querySelector('div.install-shell span.notavail');
+		
+		if (span) {
+		  span.style.color = '#888';
+		  span.style.lineHeight = '1.3';
+		  span.style.margin = '-20px 0 5px 0';
+		  span.textContent = "Visit add-on page for SeaMonkey compatibility information.";
+		}
 	  }
 	}
   },
@@ -199,7 +224,7 @@ var amoBr = {
   },
   
   /* Convert URL of Fx addon page to SM addon page */
-  _convertURLToSM: function(url) {
+  convertURLToSM: function(url) {
 	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
 	
 	var segm = url.split('/contribute/roadblock/');

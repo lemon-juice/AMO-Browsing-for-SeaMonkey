@@ -57,6 +57,7 @@ var amoBr = {
 	  
 	} else if (this.isListingPage()) {
 	  this.modifyListing();
+	  this.addSearchResultsObserver();
 	}
 	
 	this.modifyHoverCards();
@@ -256,6 +257,24 @@ var amoBr = {
 	}
   },
   
+  /* Invoke modifyListing() when pagination scripts load new add-on lists with ajax */
+  addSearchResultsObserver: function() {
+	var observer = new content.MutationObserver(function(mutations) {
+	  
+	  for (var m=0; m<mutations.length; m++) {
+		var mutation = mutations[m];
+		
+		if (mutation.type == 'childList') {
+		  content.setTimeout(amoBr.modifyListing, 0);
+		  break;
+		}
+	  }    
+	});
+	
+	var target = content.document.getElementById('pjax-results');
+	observer.observe(target, { attributes: true, childList: true, characterData: true, subtree: false });
+  },
+    
   modifyCollectionListing: function() {
 	var items = content.document.querySelectorAll('div.primary div.separated-listing div.item');
 	

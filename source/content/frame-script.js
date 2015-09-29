@@ -3,6 +3,13 @@
 
 var amoBr = {
   
+  // Numeric IDs of add-ons that should not be converted due to strict version
+  // check and strict version requirements.
+  // For these add-ons there will be no convert option offered.
+  strictAddOns:[
+	2313  // Lightning
+  ],
+  
   init: function() {
 	amoBr.converterURL = 'http://addonconverter.fotokraina.com/';
     addEventListener("DOMContentLoaded", this, false);
@@ -123,7 +130,12 @@ var amoBr = {
 	  
 	  var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href) + "&onlyMaxVersion=true";
 	  
-	  info += "It will probably not install because the author opted for strict version compatibility check. You can try using the Add-on Converter to bump the maxVersion and see if the add-on will work. <a href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>Click here</a> to convert this add-on.";
+	  if (this.strictAddOns.indexOf(compatData.addonId) >= 0) {
+		info += "It will run properly only under supported SeaMonkey versions. You may try contacting the author and ask if a version for your SeaMonkey installation is available.";
+		
+	  } else {
+		info += "It will probably not install because the author opted for strict version compatibility check. You can try using the Add-on Converter to bump the maxVersion and see if the add-on will work. <a href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>Click here</a> to convert this add-on.";
+	  }
 	  
 	  if (alertElem) {
 		alertElem.innerHTML = info;
@@ -387,6 +399,7 @@ var amoBr = {
 	
 	data.isCompatible = (dataElem.getAttribute('data-is-compatible') == 'true');
 	data.maxVersion = dataElem.getAttribute('data-max');
+	data.addonId = parseInt(dataElem.getAttribute('data-addon'), 10);
 	
 	return data;
   },

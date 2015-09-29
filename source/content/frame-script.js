@@ -232,7 +232,7 @@ var amoBr = {
 
   /* Modify add-on listing page, e.g. "Up & Coming Extensions" */
   modifyListing: function() {
-	var items = content.document.querySelectorAll('div.listing > div.items > div.item.incompatible');
+	var items = content.document.querySelectorAll('div.listing div.items > div.item.incompatible');
 	
 	for (var i=0; i<items.length; i++) {
 	  var item = items[i];
@@ -487,7 +487,7 @@ var amoBr = {
   isListingPage: function() {
 	var body = content.document.body;
 	
-	return body && body.classList.contains('extensions');
+	return body && (body.classList.contains('extensions') || body.classList.contains('pjax'));
   },
   
   /* Check if this is contribution page with download link */

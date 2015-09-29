@@ -78,8 +78,6 @@ var amoBr = {
 	  return;
 	}
 	
-	var isContribPage = content.document.getElementById('contribution') ? true : false;
-	
 	button = this.removeEventsFromElem(button);
 	button.classList.remove('concealed');
 	
@@ -97,7 +95,7 @@ var amoBr = {
 	  alertElem.style.paddingLeft = '0';
 	  alertElem.style.lineHeight = '1.4';
 	  
-	  if (isContribPage) {
+	  if (this.isContribPage()) {
 		alertElem.style.maxWidth = '400px';
 	  }
 	}
@@ -136,17 +134,12 @@ var amoBr = {
   
   /* Modify Firefox add-on page */
   modifyFirefoxPage: function() {
-	var isContribPage = false;
 	
 	// sometimes there may be 3 huge buttons, each for different OS
 	var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.concealed.CTA');
 	
 	if (hugeButtons.length == 0) {
 	  hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.concealed.CTA');
-	  
-	  if (hugeButtons.length > 0) {
-		isContribPage = true;
-	  }
 	}
 	
 	if (hugeButtons.length > 0) {
@@ -171,12 +164,12 @@ var amoBr = {
 		var infoElem = content.document.createElement('div');
 		infoElem.style.marginBottom = '1em';
 		
-		if (isContribPage) {
+		if (this.isContribPage()) {
 		  infoElem.style.marginTop = '0.5em';
 		  infoElem.style.maxWidth = '400px';
 		}
 		
-		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If the download button does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all converted extensions will work properly in SeaMonkey!</p>"
+		infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If button <em>Add to SeaMonkey</em> does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all converted extensions will work properly in SeaMonkey!</p>"
 		+ "<p style='font-size: 10pt; text-align: left'><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
 		
 		hugeButton.parentNode.appendChild(infoElem);
@@ -218,22 +211,27 @@ var amoBr = {
 	  var link = item.querySelector('h3 a');
 	  var linkButtons = item.querySelectorAll('p.install-button a.button.concealed.CTA');
 	  
-	  if (link && linkButtons.length > 0) {
+	  if (!link) {
+		continue;
+	  }
+	  
+	  if (linkButtons.length > 0) {
 		for (var j=0; j<linkButtons.length; j++) {
 		  var linkButton = linkButtons[j];
 		  
 		  if (this.isElementHidden(linkButton)) {
+			linkButton.style.display = 'none';
 			continue;
 		  }
 		  
 		  // replace "Only with Firefox — Get Firefox Now!"
 		  linkButton.textContent = "Check if SeaMonkey version is available";
-		  linkButton.className = ''; // class 'button' prevents link from working
 		  linkButton.href = this.convertURLToSM(link.href);
 		  linkButton.style.whiteSpace = 'normal';
-		  linkButton.style.padding = '0.3em';
-		  linkButton.style.display = 'inline-block';
 		}
+		
+		// this prevents the link from being disabled by AMO scripts
+		linkButtons[0].parentNode.classList.remove('install-button');
 		
 	  } else if (item.querySelector('div.install-shell div[data-version-supported=false]')) {
 		// version unsupported according to AMO
@@ -251,15 +249,55 @@ var amoBr = {
 	  }
 	  
 	  // fix AMO bug - "Continue to Download" for contribution add-ons is blocked
-	  // by 'button' class
+	  // by scripts
 	  var linkButtons = item.querySelectorAll('p.install-button a.button.contrib.go');
 	  
-	  for (var j=0; j<linkButtons.length; j++) {
-		var linkButton = linkButtons[j];
-		linkButton.className = ''; // class 'button' prevents link from working
-		linkButton.style.whiteSpace = 'normal';
-		linkButton.style.padding = '0.3em';
-		linkButton.style.display = 'inline-block';
+	  if (linkButtons.length > 0) {
+		
+		for (var j=0; j<linkButtons.length; j++) {
+		  var linkButton = linkButtons[j];
+		  
+		  if (this.isElementHidden(linkButton)) {
+			linkButton.style.display = 'none';
+			continue;
+		  }
+		}
+		
+		// this prevents the link from being disabled by AMO scripts
+		linkButtons[0].parentNode.classList.remove('install-button');
+		
+	  } else {
+		var linkButtons = item.querySelectorAll('p.install-button a.button.download');
+		
+		if (linkButtons.length > 0) {
+		  // replace green "Download Now" buttons that are disabled anyway
+		  var removeBlock = false;
+		  
+		  for (var j=0; j<linkButtons.length; j++) {
+			var linkButton = linkButtons[j];
+			
+			if (linkButton.classList.length != 2) {
+			  continue;
+			}
+			
+			removeBlock = true;
+			
+			if (this.isElementHidden(linkButton)) {
+			  linkButton.style.display = 'none';
+			  continue;
+			}
+			
+			linkButton.textContent = "Check if SeaMonkey version is available";
+			linkButton.href = this.convertURLToSM(link.href);
+			linkButton.style.whiteSpace = 'normal';
+			linkButton.classList.add('concealed');
+		  }
+		  
+		  if (removeBlock) {
+			// this prevents the link from being disabled by AMO scripts
+			linkButtons[0].parentNode.classList.remove('install-button');
+		  }
+		}
 	  }
 	}
   },
@@ -327,10 +365,11 @@ var amoBr = {
   convertURLToSM: function(url) {
 	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
 	
-	var segm = url.split('/contribute/roadblock/');
-	if (segm.length > 1) {
+	var pos = url.indexOf('/contribute/roadblock/');
+	
+	if (pos > 0) {
 	  // this is URL of contribution page - change to main addon page
-	  url = segm[0] + '/';
+	  url = url.substr(0, pos + 1);
 	}
 	
 	return url;
@@ -395,6 +434,11 @@ var amoBr = {
 	var body = content.document.body;
 	
 	return body && body.classList.contains('extensions');
+  },
+  
+  /* Check if this is contribution page with download link */
+  isContribPage: function() {
+	return content.document.getElementById('contribution') && content.document.body.classList.contains('meet');
   },
   
   isElementHidden: function(elem) {

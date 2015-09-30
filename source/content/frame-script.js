@@ -113,7 +113,7 @@ var amoBr = {
 	button.classList.remove('concealed');
 	
 	if (!button.classList.contains('caution')) {
-	  // not preliminarily reviewed
+	  // fully reviewed (not preliminarily) - add amber bg
 	  button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
 	}
 	
@@ -180,6 +180,10 @@ var amoBr = {
 		var tagEnd = "</a>";
 		info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
 	  }
+	  
+	  // grey button:
+	  button.style.background = '';
+	  button.classList.add('concealed');
 	  
 	  alertElem.innerHTML = info;
 	  alertElem.style.color = 'red';

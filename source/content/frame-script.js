@@ -116,20 +116,30 @@ var amoBr = {
 	  button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
 	}
 	
-	var addonData = this.getAddonData();
-	var alertElem = content.document.querySelector('div.extra span.notavail');
+	var extra = content.document.querySelector('div.install-shell div.extra');
 	
-	if (alertElem) {
-	  alertElem.style.background = 'none';
-	  alertElem.style.whiteSpace = 'normal';
-	  alertElem.style.paddingLeft = '0';
-	  alertElem.style.lineHeight = '1.4';
-	  
-	  if (this.isContribPage()) {
-		alertElem.style.maxWidth = '400px';
-	  }
+	if (!extra) {
+	  return;
 	}
 	
+	extra.style.opacity = '0.5';
+	
+	var label = content.document.createElement('div');
+	label.style.margin = '1.5em 0 0.5em';
+	label.style.fontSize = '90%';
+	label.textContent = this.getString('officialStatus');
+	extra.insertBefore(label, extra.firstChild);
+	
+	var alertElem = content.document.createElement('div');
+	extra.parentNode.insertBefore(alertElem, extra);
+	
+	alertElem.style.lineHeight = '1.4';
+	
+	if (this.isContribPage()) {
+	  alertElem.style.maxWidth = '400px';
+	}
+	
+	var addonData = this.getAddonData();
 	var info = "";
 	
 	if (addonData.isCompatible) {
@@ -139,10 +149,8 @@ var amoBr = {
 		+ amoBr.getString('maxSupportedVer_workFine');
 	  }
 	  
-	  if (alertElem) {
-		alertElem.textContent = info;
-		alertElem.style.color = 'green';
-	  }
+	  alertElem.textContent = info;
+	  alertElem.style.color = 'green';
 	  
 	} else {
 	  // maxVersion is too low and probably strict compatibility is enforced
@@ -161,10 +169,8 @@ var amoBr = {
 		info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
 	  }
 	  
-	  if (alertElem) {
-		alertElem.innerHTML = info;
-		alertElem.style.color = 'red';
-	  }
+	  alertElem.innerHTML = info;
+	  alertElem.style.color = 'red';
 	}
   },
   

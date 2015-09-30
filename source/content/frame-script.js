@@ -1,5 +1,6 @@
 "use strict";
   
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 var amoBr = {
   
@@ -127,6 +128,7 @@ var amoBr = {
 	var label = content.document.createElement('div');
 	label.style.margin = '1.5em 0 0.5em';
 	label.style.fontSize = '90%';
+	label.style.fontStyle = 'italic';
 	label.textContent = this.getString('officialStatus');
 	extra.insertBefore(label, extra.firstChild);
 	
@@ -134,6 +136,7 @@ var amoBr = {
 	extra.parentNode.insertBefore(alertElem, extra);
 	
 	alertElem.style.lineHeight = '1.4';
+	alertElem.style.fontWeight = 'bold';
 	
 	if (this.isContribPage()) {
 	  alertElem.style.maxWidth = '400px';
@@ -144,12 +147,21 @@ var amoBr = {
 	
 	if (addonData.isCompatible) {
 	  // add-on is compatible, only maxVersion is too low
-	  if (addonData.maxVersion) {
+	  var compatibleByDefault = (Services.vc.compare(addonData.maxVersion, '2.1') >= 0);
+	  
+	  if (compatibleByDefault) {
 		info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
 		+ amoBr.getString('maxSupportedVer_workFine');
+	  
+	  } else {
+		// very old extension - needs conversion
+		var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
+		
+		info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+		+ amoBr.getString('maxSupportedVer_needsConversion', ["<a href='" + link + "'>", "</a>"]);
 	  }
 	  
-	  alertElem.textContent = info;
+	  alertElem.innerHTML = info;
 	  alertElem.style.color = 'green';
 	  
 	} else {

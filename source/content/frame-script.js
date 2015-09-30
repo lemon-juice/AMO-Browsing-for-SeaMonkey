@@ -19,8 +19,23 @@ var amoBr = {
   ],
   
   init: function() {
+	amoBr.stringBundle = Services.strings.createBundle('chrome://amobrowsing/locale/global.properties?' + Math.random()); // Randomize URI to work around bug 719376
+
     addEventListener("DOMContentLoaded", this, false);
 	addMessageListener("AMOBrowsing:removeEvents", this);
+  },
+  
+  /* Get localized string */
+  getString: function(name, params) {
+	if (!params) {
+	  return this.stringBundle.GetStringFromName(name);
+	}
+	
+	if (!Array.isArray(params)) {
+	  params = [params];
+	}
+	
+	return this.stringBundle.formatStringFromName(name, params, params.length);
   },
   
   /* Receiving message from addMessageListener */
@@ -120,9 +135,8 @@ var amoBr = {
 	if (addonData.isCompatible) {
 	  // add-on is compatible, only maxVersion is too low
 	  if (addonData.maxVersion) {
-		info = "Maximum officially supported SeaMonkey version for this add-on is " + addonData.maxVersion + ". "
-		+ "However, it is likely it will work fine also in newer SeaMonkey versions.";
-		
+		info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+		+ amoBr.getString('maxSupportedVer_workFine');
 	  }
 	  
 	  if (alertElem) {
@@ -133,16 +147,18 @@ var amoBr = {
 	} else {
 	  // maxVersion is too low and probably strict compatibility is enforced
 	  if (addonData.maxVersion) {
-		info = "Maximum officially supported SeaMonkey version for this add-on is " + addonData.maxVersion + ". ";
+		info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' ';
 	  }
 	  
 	  var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href) + "&onlyMaxVersion=true";
 	  
 	  if (this.strictAddOns.indexOf(addonData.addonId) >= 0) {
-		info += "It will run properly only under supported SeaMonkey versions. You may try contacting the author and ask if a version for your SeaMonkey installation is available.";
+		info += amoBr.getString('maxSupportedVer_strictForced');
 		
 	  } else {
-		info += "It will probably not install because the author opted for strict version compatibility check. You can try using the Add-on Converter to bump the maxVersion and see if the add-on will work. <a href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>Click here</a> to convert this add-on.";
+		var tagStart = "<a href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
+		var tagEnd = "</a>";
+		info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
 	  }
 	  
 	  if (alertElem) {
@@ -190,10 +206,10 @@ var amoBr = {
 	hugeButton.classList.remove('concealed');
 	hugeButton.classList.remove('CTA');
 	hugeButton.style.display = 'inline-block';
-	hugeButton.textContent = "Check if SeaMonkey version is available";
+	hugeButton.textContent = amoBr.getString('checkForSMVersion');
 	hugeButton.href = this.convertURLToSM(content.location.href);
 	
-	var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
+	var convertLink = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
 	
 	var infoElem = content.document.createElement('div');
 	infoElem.style.marginBottom = '1em';
@@ -203,8 +219,14 @@ var amoBr = {
 	  infoElem.style.maxWidth = '400px';
 	}
 	
-	infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>If button <em>Add to SeaMonkey</em> does not appear after checking for SeaMonkey version, it means SeaMonkey is not officially supported. In this case you may try using the <a href='" + this.converterURL + "'>Add-on Converter</a>. Warning: not all converted extensions will work properly in SeaMonkey!</p>"
-	+ "<p style='font-size: 10pt; text-align: left'><a href='" + link + "'>Click here</a> to convert this extension &ndash; use only if no SeaMonkey version exists.</p>";
+	var par1 = amoBr.getString('checkForSMVersion_info',
+	  ["<a href='" + this.converterURL + "'>", "</a>"]);
+	
+	var par2 = amoBr.getString('checkForSMVersion_convert',
+	  ["<a href='" + convertLink + "'>", "</a>"]);
+	
+	infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
+	+ "<p style='font-size: 10pt; text-align: left'>" + par2 + "</p>";
 	
 	hugeButton.parentNode.appendChild(infoElem);
   },
@@ -215,7 +237,7 @@ var amoBr = {
 	hugeButton.classList.remove('concealed');
 	hugeButton.classList.remove('CTA');
 	hugeButton.style.display = 'inline-block';
-	hugeButton.textContent = "+ Add to SeaMonkey";
+	hugeButton.textContent = "+ " + amoBr.getString('addTOSM');
 	hugeButton.href = downloadAnywayButton.href;
 	
 	var infoElem = content.document.createElement('div');
@@ -226,7 +248,7 @@ var amoBr = {
 	  infoElem.style.maxWidth = '400px';
 	}
 	
-	infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: green'>Official SeaMonkey support is not offered by this add-on, however it should work fine. Feel free to install it!</p>";
+	infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: green'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
 	
 	hugeButton.parentNode.appendChild(infoElem);
   },
@@ -249,7 +271,7 @@ var amoBr = {
 		div.style.fontSize = '8pt';
 		div.style.textAlign = 'center';
 		div.style.lineHeight = '1.4';
-		div.textContent = "Visit add-on page for SeaMonkey compatibility information.";
+		div.textContent = amoBr.getString('visitAddOn');
 		
 		action.textContent = '';
 		action.appendChild(div);
@@ -259,6 +281,12 @@ var amoBr = {
   
   /* Invoke modifyListing() when pagination scripts load new add-on lists with ajax */
   addSearchResultsObserver: function() {
+	var target = content.document.getElementById('pjax-results');
+	
+	if (!target) {
+	  return;
+	}
+	
 	var observer = new content.MutationObserver(function(mutations) {
 	  
 	  for (var m=0; m<mutations.length; m++) {
@@ -271,7 +299,6 @@ var amoBr = {
 	  }    
 	});
 	
-	var target = content.document.getElementById('pjax-results');
 	observer.observe(target, { attributes: true, childList: true, characterData: true, subtree: false });
   },
     
@@ -297,7 +324,7 @@ var amoBr = {
 		  }
 		  
 		  // replace "Only with Firefox — Get Firefox Now!"
-		  linkButton.textContent = "Check if SeaMonkey version is available";
+		  linkButton.textContent = amoBr.getString('checkForSMVersion');
 		  linkButton.href = this.convertURLToSM(link.href);
 		  linkButton.style.whiteSpace = 'normal';
 		}
@@ -314,7 +341,7 @@ var amoBr = {
 		  span.style.paddingLeft = '0';
 		  span.style.fontWeight = 'normal';
 		  span.style.whiteSpace = 'normal';
-		  span.textContent = "Visit add-on page for SeaMonkey compatibility information.";
+		  span.textContent = amoBr.getString('visitAddOn');
 		  span.parentNode.style.lineHeight = '1.3';
 		}
 		
@@ -359,7 +386,7 @@ var amoBr = {
 			  continue;
 			}
 			
-			linkButton.textContent = "Check if SeaMonkey version is available";
+			linkButton.textContent = amoBr.getString('checkForSMVersion');
 			linkButton.href = this.convertURLToSM(link.href);
 			linkButton.style.whiteSpace = 'normal';
 			linkButton.classList.add('concealed');
@@ -391,7 +418,7 @@ var amoBr = {
 		  span.style.color = '#888';
 		  span.style.lineHeight = '1.3';
 		  span.style.margin = '-20px 0 5px 0';
-		  span.textContent = "Visit add-on page for SeaMonkey compatibility information.";
+		  span.textContent = amoBr.getString('visitAddOn');
 		}
 	  }
 	}

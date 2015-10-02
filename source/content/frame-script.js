@@ -20,10 +20,11 @@ var amoBr = {
   ],
   
   init: function() {
-	amoBr.stringBundle = Services.strings.createBundle('chrome://amobrowsing/locale/global.properties?' + Math.random()); // Randomize URI to work around bug 719376
+	this.stringBundle = Services.strings.createBundle('chrome://amobrowsing/locale/global.properties?' + Math.random()); // Randomize URI to work around bug 719376
 
-    addEventListener("DOMContentLoaded", this, false);
+	addMessageListener("AMOBrowsing:registerEvents", this);
 	addMessageListener("AMOBrowsing:removeEvents", this);
+	this.registerEvents();
   },
   
   /* Get localized string */
@@ -43,11 +44,19 @@ var amoBr = {
   receiveMessage: function(aMsg) {
     switch (aMsg.name) {
       case "AMOBrowsing:removeEvents": this.removeEvents(); break;
+      case "AMOBrowsing:registerEvents": this.registerEvents(); break;
 	}
   },
   
+  registerEvents: function() {
+	addEventListener("DOMContentLoaded", this, false);
+  },
+  
+  /* Remove events on add-on shutdown */
   removeEvents: function() {
 	removeEventListener("DOMContentLoaded", this, false);
+	removeMessageListener("AMOBrowsing:registerEvents", this);
+	removeMessageListener("AMOBrowsing:removeEvents", this);
   },
   
   /* Handle DOMContentLoaded event */
@@ -57,16 +66,21 @@ var amoBr = {
 	  return;
 	}
 	
-	var url = e.target.defaultView.location.href;
-	
-	if (url.indexOf('https://addons.mozilla.org/') != 0) {
+	if (e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0) {
 	  return;
 	}
 	
 	var app = this.getPageApp();
 	
 	if (app == 'seamonkey') {
+	  // SM add-on page
 	  this.modifySeaMonkeyPage();
+	  
+	  var target = content.document.getElementById('page');
+	  
+	  if (target) {
+		this.addHoverCardObserver(target);
+	  }
 	  
 	} else if (app == 'firefox') {
 	  this.modifyFirefoxPage();
@@ -77,16 +91,6 @@ var amoBr = {
 	}
 	
 	this.modifyHoverCards();
-	
-	if (app == 'seamonkey') { // SM add-on page
-	  
-	  var target = content.document.getElementById('page');
-	  
-	  if (target) {
-		this.addHoverCardObserver(target);
-	  }
-	}
-	
 	this.modifyCollectionListing();
   },
   
@@ -113,7 +117,7 @@ var amoBr = {
 	button.classList.remove('concealed');
 	
 	if (!button.classList.contains('caution')) {
-	  // fully reviewed (not preliminarily) - add amber bg
+	  // fully reviewed (not preliminarily) add-on - add amber bg
 	  button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
 	}
 	

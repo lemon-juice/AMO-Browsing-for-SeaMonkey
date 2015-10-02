@@ -2,8 +2,19 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 
+var sessionStartTime;
+
 function startup(data,reason) {
-  forEachOpenWindow(loadIntoWindow);
+  // we use time to append to frame sript URLs to make upgrades effective immediately
+  // due to Bug 1051238
+  sessionStartTime = Date.now();
+
+  var upgrade = (reason == ADDON_UPGRADE || reason == ADDON_DOWNGRADE);
+  
+  forEachOpenWindow(function(window) {
+    loadIntoWindow(window, upgrade);
+  });
+  
   Services.wm.addListener(WindowListener);
 }
 
@@ -11,8 +22,13 @@ function shutdown(data,reason) {
   if (reason == APP_SHUTDOWN) {
     return;
   }
-
-  forEachOpenWindow(unloadFromWindow);
+  
+  var upgrade = (reason == ADDON_UPGRADE || reason == ADDON_DOWNGRADE);
+  
+  forEachOpenWindow(function(window) {
+    unloadFromWindow(window, upgrade);
+  });
+  
   Services.wm.removeListener(WindowListener);
   Services.obs.notifyObservers(null, "chrome-flush-caches", null);
 }
@@ -21,21 +37,22 @@ function install(data,reason) {}
 
 function uninstall(data,reason) {}
 
-function loadIntoWindow(window) {
-  var winType = window.document.documentElement.getAttribute("windowtype");
-  
-  if (winType == "navigator:browser") {
-    window.messageManager.loadFrameScript("chrome://amobrowsing/content/frame-script.js", true);
+function loadIntoWindow(window, upgrade) {
+  if (upgrade) {
+    // use timeout to prevent race conditions on upgrades (work around Bug 1202125)
+    window.setTimeout(function(win) {
+      win.messageManager.loadFrameScript("chrome://amobrowsing/content/frame-script.js?" + sessionStartTime, true);
+    }, 250, window);
+    
+  } else {
+    window.messageManager.loadFrameScript("chrome://amobrowsing/content/frame-script.js?" + sessionStartTime, true);
   }
 }
 
-function unloadFromWindow(window) {
-  var numTabs = window.gBrowser.browsers.length;
+function unloadFromWindow(window, upgrade) {
+  window.messageManager.removeDelayedFrameScript("chrome://amobrowsing/content/frame-script.js?" + sessionStartTime);
   
-  for (var i = 0; i < numTabs; i++) {
-    var currentBrowser = window.gBrowser.getBrowserAtIndex(i);
-    currentBrowser.messageManager.sendAsyncMessage("AMOBrowsing:removeEvents");
-  }
+  window.messageManager.broadcastAsyncMessage("AMOBrowsing:removeEvents");
 }
 
 

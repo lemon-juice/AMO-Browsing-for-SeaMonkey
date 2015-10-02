@@ -67,31 +67,35 @@ var amoBr = {
       return;
     }
     
-    var app = this.getPageApp();
+    var app = this.detectAppNameForPage();
     
-    if (app == 'seamonkey') {
-      // SM add-on page
-      this.modifySeaMonkeyPage();
-      
-      var target = content.document.getElementById('page');
-      
-      if (target) {
-        this.addHoverCardObserver(target);
+    if (this.isAddonPage()) {
+      if (app == 'seamonkey') {
+        this.modifySeaMonkeyPage();
+        
+        var target = content.document.getElementById('page');
+        
+        if (target) {
+          this.addHoverCardObserver(target);
+        }
+        
+      } else if (app == 'firefox') {
+        this.modifyFirefoxPage();
+        
+      } else if (app == 'thunderbird') {
+        this.modifyThunderbirdPage();
       }
       
-    } else if (app == 'firefox') {
-      this.modifyFirefoxPage();
+    } else {
+      // not add-on page
+      if (this.isListingPage()) {
+        this.modifyListing();
+        this.addSearchResultsObserver();
+      }
       
-    } else if (app == 'thunderbird') {
-      this.modifyThunderbirdPage();
-      
-    } else if (this.isListingPage()) {
-      this.modifyListing();
-      this.addSearchResultsObserver();
+      this.modifyCollectionListing();
+      this.modifyHoverCards();
     }
-  
-    this.modifyHoverCards();
-    this.modifyCollectionListing();
   },
   
   /* Modify SeaMonkey add-on page */
@@ -572,8 +576,8 @@ var amoBr = {
     return data;
   },
   
-  /* Get the name of application of add-on page. NULL if not add-on page. */
-  getPageApp: function() {
+  /* Check if this is add-on page. */
+  isAddonPage: function() {
     var body = content.document.body;
     
     if (!body) {
@@ -584,8 +588,15 @@ var amoBr = {
       || (body.classList.contains('meet')  // also include contribution download page
           && !body.classList.contains('profile'))
       );
+
+    return isAddonPage;
+  },
+  
+  /* Get the name of application for current AMO page. */
+  detectAppNameForPage: function() {
+    var body = content.document.body;
     
-    if (!isAddonPage) {
+    if (!body) {
       return null;
     }
     
@@ -602,11 +613,7 @@ var amoBr = {
     if (c.contains('thunderbird')) {
       return 'thunderbird';
     }
-    
-    if (c.contains('android')) {
-      return 'android';
-    }
-    
+
     return null;
   },
   

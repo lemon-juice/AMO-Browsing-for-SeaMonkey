@@ -136,14 +136,14 @@ var amoBr = {
     label.textContent = this.getString('officialStatus');
     extra.insertBefore(label, extra.firstChild);
     
-    var alertElem = content.document.createElement('div');
-    extra.parentNode.insertBefore(alertElem, extra);
+    var infoElem = content.document.createElement('div');
+    extra.parentNode.insertBefore(infoElem, extra);
     
-    alertElem.style.lineHeight = '1.4';
-    alertElem.style.fontWeight = 'bold';
+    infoElem.style.lineHeight = '1.4';
+    infoElem.style.fontWeight = 'bold';
     
     if (this.isContribPage()) {
-      alertElem.style.maxWidth = '400px';
+      infoElem.style.maxWidth = '400px';
     }
     
     var addonData = this.getAddonData();
@@ -165,8 +165,8 @@ var amoBr = {
         + amoBr.getString('maxSupportedVer_needsConversion', ["<a href='" + link + "'>", "</a>"]);
       }
       
-      alertElem.innerHTML = info;
-      alertElem.style.color = 'green';
+      infoElem.innerHTML = info;
+      infoElem.style.color = 'green';
       
     } else {
       // maxVersion is too low and probably strict compatibility is enforced
@@ -189,8 +189,8 @@ var amoBr = {
       button.style.background = '';
       button.classList.add('concealed');
       
-      alertElem.innerHTML = info;
-      alertElem.style.color = 'red';
+      infoElem.innerHTML = info;
+      infoElem.style.color = 'red';
     }
   },
   

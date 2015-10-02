@@ -281,7 +281,7 @@ var amoBr = {
   
   /* Modify Thunderbird add-on page */
   modifyThunderbirdPage: function() {
-    var shell = content.document.querySelector('#addon div.install-shell');
+    var shell = content.document.querySelector('#addon div.install-shell, #contribution div.install-shell');
     
     if (!shell) {
       return;
@@ -290,6 +290,11 @@ var amoBr = {
     var infoElem = content.document.createElement('div');
     infoElem.style.marginTop = '1em';
     infoElem.style.lineHeight = '1.4';
+
+    if (this.isContribPage()) {
+      infoElem.style.maxWidth = '400px';
+      infoElem.style.textAlign = 'left';
+    }
     
     var SMLink = this.convertURLToSM(content.location.href);
     var converterLink = this.converterURL;

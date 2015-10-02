@@ -5,7 +5,7 @@
     <em:id>amobrowsing@seamonkey.mozilla.org</em:id>
     <em:version>0.9.6</em:version>
     <em:type>2</em:type>
-	<em:bootstrap>true</em:bootstrap>
+    <em:bootstrap>true</em:bootstrap>
 
     <em:targetApplication>
       <!-- SeaMonkey -->
@@ -18,7 +18,7 @@
  
    <em:name>AMO Browsing for SeaMonkey</em:name>
     <em:description>This extension makes browsing for extensions easier at addons.mozilla.org. It fixes incorrect information about some extensions being not available for SeaMonkey and adds links to the Add-on Converter where needed.
-	</em:description>
+    </em:description>
     <em:creator>Lemon Juice</em:creator>
     <em:homepageURL>https://github.com/lemon-juice/AMO-Browsing-for-SeaMonkey</em:homepageURL>
   </rdf:Description>

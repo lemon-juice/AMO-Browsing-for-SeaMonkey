@@ -505,9 +505,12 @@ var amoBr = {
             
             if (node.nodeName == 'SECTION'
               && node.classList.contains('primary')
-              && node.querySelector('#recommendations-grid, #author-addons')) {
+              && node.querySelector('#recommendations-grid, #author-addons, #beta-channel')) {
               observer.disconnect();
-              content.setTimeout(amoBr.modifyHoverCards, 0);
+              content.setTimeout(function() {
+                amoBr.modifyHoverCards();
+                amoBr.modifyDevelopmentChannel();
+              }, 0);
               break mutationsLoop;
             }
           }
@@ -516,6 +519,20 @@ var amoBr = {
     });
     
     observer.observe(target, { attributes: true, childList: true, characterData: true, subtree: true });
+  },
+  
+  /* Unblock download button in Development Channel */
+  modifyDevelopmentChannel: function() {
+    var buttons = content.document.querySelectorAll('#install-beta p.install-button a.button.caution.add.concealed');
+    
+    for (var i=0; i<buttons.length; i++) {
+      var button = buttons[i];
+      
+      if (!amoBr.isElementHidden(button)) {
+        // this makes the button clickable
+        button.classList.remove('caution');
+      }
+    }
   },
   
   removeEventsFromElem: function(elem) {

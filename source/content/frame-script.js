@@ -58,12 +58,10 @@ var amoBr = {
   
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
-    if (e.target.defaultView.frameElement) {
-      // don't do anything in frames
-      return;
-    }
-    
-    if (e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0) {
+    if (e.target.defaultView.frameElement // ignore frames
+        || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
+        || !content.document.body
+        ) {
       return;
     }
     
@@ -91,6 +89,9 @@ var amoBr = {
       if (this.isListingPage()) {
         this.modifyListing();
         this.addSearchResultsObserver();
+      
+      } else if (this.isVersionsPage()) {
+        this.modifyVersionsPage();
       }
       
       this.modifyCollectionListing();
@@ -492,6 +493,19 @@ var amoBr = {
     }
   },
   
+  modifyVersionsPage: function() {
+    var buttons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.caution.add.concealed');
+    
+    for (var i=0; i<buttons.length; i++) {
+      var button = buttons[i];
+      
+      if (!this.isElementHidden(button)) {
+        // this makes the button clickable
+        button.classList.remove('caution');
+      }
+    }
+  },
+  
   /* Invoke modifyHoverCards() when "Often used with..." and "Other add-ons by these authors"
    * panels are injected into page by AMO ajax
    */
@@ -580,10 +594,6 @@ var amoBr = {
   isAddonPage: function() {
     var body = content.document.body;
     
-    if (!body) {
-      return null;
-    }
-    
     var isAddonPage = (body.classList.contains('addon-details')
       || (body.classList.contains('meet')  // also include contribution download page
           && !body.classList.contains('profile'))
@@ -592,15 +602,14 @@ var amoBr = {
     return isAddonPage;
   },
   
+  /* Check if this is add-on's versions page. */
+  isVersionsPage: function() {
+    return content.document.body.classList.contains('versions');
+  },
+  
   /* Get the name of application for current AMO page. */
   detectAppNameForPage: function() {
-    var body = content.document.body;
-    
-    if (!body) {
-      return null;
-    }
-    
-    var c = body.classList;
+    var c = content.document.body.classList;
     
     if (c.contains('seamonkey')) {
       return 'seamonkey';
@@ -620,7 +629,7 @@ var amoBr = {
   /* Check if add-ons listing page is loaded */
   isListingPage: function() {
     var body = content.document.body;
-    return body && (body.classList.contains('extensions') || body.classList.contains('pjax'));
+    return (body.classList.contains('extensions') || body.classList.contains('pjax'));
   },
   
   /* Check if this is contribution page with download link */

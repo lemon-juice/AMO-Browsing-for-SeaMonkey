@@ -85,6 +85,9 @@ var amoBr = {
 	} else if (app == 'firefox') {
 	  this.modifyFirefoxPage();
 	  
+	} else if (app == 'thunderbird') {
+	  this.modifyThunderbirdPage();
+	  
 	} else if (this.isListingPage()) {
 	  this.modifyListing();
 	  this.addSearchResultsObserver();
@@ -248,7 +251,7 @@ var amoBr = {
 	var par1 = amoBr.getString('checkForSMVersion_info',
 	  ["<a href='" + this.converterURL + "'>", "</a>"]);
 	
-	var par2 = amoBr.getString('checkForSMVersion_convert',
+	var par2 = amoBr.getString('convertAddon',
 	  ["<a href='" + convertLink + "'>", "</a>"]);
 	
 	infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
@@ -278,6 +281,40 @@ var amoBr = {
 	
 	hugeButton.parentNode.appendChild(infoElem);
   },
+  
+  /* Modify Thunderbird add-on page */
+  modifyThunderbirdPage: function() {
+	var shell = content.document.querySelector('#addon div.install-shell');
+	
+	if (!shell) {
+	  return;
+	}
+
+	var infoElem = content.document.createElement('div');
+	infoElem.style.marginTop = '1em';
+	infoElem.style.lineHeight = '1.4';
+	
+	var SMLink = this.convertURLToSM(content.location.href);
+	var converterLink = this.converterURL;
+	var convertLink = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
+	
+	
+	var addonData = this.getAddonData();
+	if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
+	  infoElem.innerHTML = amoBr.getString('TbInfo',
+						  ["<a href='" + SMLink + "'><b>", "</b></a>",
+						   "<a href='" + converterLink + "'>", "</a>"]) + '<br><br>'
+						+ amoBr.getString('convertAddon',
+						  ["<a href='" + convertLink + "'>", "</a>"]);
+
+	} else {
+	  infoElem.innerHTML = amoBr.getString('SmVersionExists',
+						  ["<a href='" + SMLink + "'><b>", "</b></a>"]);
+	}
+	
+	shell.appendChild(infoElem);
+  },
+
 
   /* Modify add-on listing page, e.g. "Up & Coming Extensions" */
   modifyListing: function() {
@@ -486,9 +523,9 @@ var amoBr = {
 	return newElem;
   },
   
-  /* Convert URL of Fx addon page to SM addon page */
+  /* Convert URL of Fx or TB addon page to SM addon page */
   convertURLToSM: function(url) {
-	url = url.replace('/firefox/addon/', '/seamonkey/addon/');
+	url = url.replace(/\/(firefox|thunderbird)\/addon\//, '/seamonkey/addon/');
 	
 	var pos = url.indexOf('/contribute/roadblock/');
 	

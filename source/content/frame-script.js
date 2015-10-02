@@ -523,11 +523,11 @@ var amoBr = {
             
             if (node.nodeName == 'SECTION'
               && node.classList.contains('primary')
-              && node.querySelector('#recommendations-grid, #author-addons, #beta-channel')) {
+              && node.querySelector('#recommendations-grid, #author-addons, #beta-channel, div.version.item')) {
               observer.disconnect();
               content.setTimeout(function() {
                 amoBr.modifyHoverCards();
-                amoBr.modifyDevelopmentChannel();
+                amoBr.modifyDevelopmentChannelAndVerInfo();
               }, 0);
               break mutationsLoop;
             }
@@ -539,9 +539,9 @@ var amoBr = {
     observer.observe(target, { attributes: true, childList: true, characterData: true, subtree: true });
   },
   
-  /* Unblock download button in Development Channel */
-  modifyDevelopmentChannel: function() {
-    var buttons = content.document.querySelectorAll('#install-beta p.install-button a.button.caution.add.concealed');
+  /* Unblock download button in Development Channel and Version Information */
+  modifyDevelopmentChannelAndVerInfo: function() {
+    var buttons = content.document.querySelectorAll('#install-beta p.install-button a.button.caution.add.concealed, #detail-relnotes p.install-button a.button.caution.add.concealed');
     
     for (var i=0; i<buttons.length; i++) {
       var button = buttons[i];

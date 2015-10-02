@@ -3,7 +3,7 @@
          xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <rdf:Description rdf:about="urn:mozilla:install-manifest">
     <em:id>amobrowsing@seamonkey.mozilla.org</em:id>
-    <em:version>0.9.5</em:version>
+    <em:version>0.9.6</em:version>
     <em:type>2</em:type>
 	<em:bootstrap>true</em:bootstrap>
 
@@ -17,7 +17,7 @@
     </em:targetApplication>
  
    <em:name>AMO Browsing for SeaMonkey</em:name>
-    <em:description>This extension makes browsing for extensions easier at addons.mozilla.org. It fixes incorrect information about some extensions being not available for SeaMonkey and adds link to the Add-on Converter where needed.
+    <em:description>This extension makes browsing for extensions easier at addons.mozilla.org. It fixes incorrect information about some extensions being not available for SeaMonkey and adds links to the Add-on Converter where needed.
 	</em:description>
     <em:creator>Lemon Juice</em:creator>
     <em:homepageURL>https://github.com/lemon-juice/AMO-Browsing-for-SeaMonkey</em:homepageURL>

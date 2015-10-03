@@ -6,14 +6,14 @@ var amoBr = {
   
   converterURL: 'http://addonconverter.fotokraina.com/',
   
-  // Numeric IDs of add-ons that should not be converted due to strict version
+  // Numeric IDs of SeaMonkey add-ons that should not be converted due to strict version
   // check and strict version requirements.
   // For these add-ons there will be no convert option offered.
   strictAddOns:[
     2313  // Lightning
   ],
   
-  // Numeric IDs of add-ons that work in Firefox without conversion, although
+  // Numeric IDs of add-ons that work in SeaMonkey without conversion, although
   // they appear Firefox-only at AMO.
   workingFxAddOns:[
     1843  // Firebug
@@ -213,20 +213,20 @@ var amoBr = {
       var addOnData = this.getAddonData();
       
       for (var i=0; i<hugeButtons.length; i++) {
-      var hugeButton = hugeButtons[i];
-      
-      if (this.isElementHidden(hugeButton)) {
-        // hidden button for other OS
-        continue;
-      }
-      
-      var downloadAnywayButton = content.document.getElementById('downloadAnyway');
-      
-      if (this.workingFxAddOns.indexOf(addOnData.addonId) >= 0 && downloadAnywayButton) {
-        this.FxPageAddOnIsCompatible(hugeButton, downloadAnywayButton);
+        var hugeButton = hugeButtons[i];
         
-      } else {
-        this.FxPageCheckForSMVersion(hugeButton);
+        if (this.isElementHidden(hugeButton)) {
+          // hidden button for other OS
+          continue;
+        }
+        
+        var downloadAnywayButton = content.document.getElementById('downloadAnyway');
+        
+        if (this.workingFxAddOns.indexOf(addOnData.addonId) >= 0 && downloadAnywayButton) {
+          this.FxPageAddOnIsCompatible(hugeButton, downloadAnywayButton);
+          
+        } else {
+          this.FxPageCheckForSMVersion(hugeButton);
         }
       }
     }

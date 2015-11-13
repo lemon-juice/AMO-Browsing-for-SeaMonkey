@@ -8,7 +8,7 @@ var amoBr = {
   
   // Numeric IDs of SeaMonkey add-ons that should not be converted due to strict version
   // check and strict version requirements.
-  // For these add-ons there will be no convert option offered.
+  // For these add-ons the convert option will not be offered.
   strictAddOns:[
     2313  // Lightning
   ],
@@ -494,6 +494,7 @@ var amoBr = {
   },
   
   modifyVersionsPage: function() {
+    // activate download buttons that may be unclickable
     var buttons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.caution.add.concealed');
     
     for (var i=0; i<buttons.length; i++) {
@@ -502,6 +503,39 @@ var amoBr = {
       if (!this.isElementHidden(button)) {
         // this makes the button clickable
         button.classList.remove('caution');
+      }
+    }
+    
+    // on Fx beta version page - replace huge "only with Firefox" buttons
+    // with download buttons
+    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.caution.concealed.CTA[data-realurl]');
+    
+    var modified = false;
+    
+    for (var i=0; i<hugeButtons.length; i++) {
+      var hugeButton = hugeButtons[i];
+      
+      if (!this.isElementHidden(hugeButton)) {
+        // remove the huge appearance of the button
+        hugeButton.classList.remove('CTA');
+        
+        // this makes the button clickable
+        hugeButton.classList.remove('caution');
+        
+        hugeButton.href = hugeButton.getAttribute('data-realurl');
+        hugeButton.textContent = this.getString('download');
+        
+        modified = true;
+      }
+    }
+    
+    if (modified) {
+      // hide the download anyway button because it's redundant now and points
+      // to a wrong version, anyway
+      var dAnyway = content.document.querySelector('a#downloadAnyway');
+      
+      if (dAnyway) {
+        dAnyway.style.display = 'none';
       }
     }
   },

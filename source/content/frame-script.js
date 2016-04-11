@@ -161,7 +161,7 @@ var amoBr = {
       }
       
       infoElem.innerHTML = info;
-      infoElem.style.color = 'green';
+      infoElem.style.color = 'lawngreen';
       
     } else {
       // maxVersion is too low and probably strict compatibility is enforced
@@ -269,7 +269,7 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
     
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: green'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
+    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: lawngreen'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
     
     hugeButton.parentNode.appendChild(infoElem);
   },

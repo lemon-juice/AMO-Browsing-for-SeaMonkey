@@ -102,21 +102,11 @@ var amoBr = {
   /* Modify SeaMonkey add-on page */
   modifySeaMonkeyPage: function() {
     var buttons = content.document.querySelectorAll('p.install-button a.button.add.concealed, p.install-button a.button.contrib.go.concealed');
-    var button;
-    
-    for (var i=0; i<buttons.length; i++) {
-      var b = buttons[i];
-      
-      if (!this.isElementHidden(b)) {
-        // visible button
-        button = b;
-        break;
-      }
-    }
-    
-    if (!button) {
+    if (buttons.length == 0) {
       return;
     }
+    
+    var button = buttons[0];
     
     button = this.removeEventsFromElem(button);
     button.classList.remove('concealed');

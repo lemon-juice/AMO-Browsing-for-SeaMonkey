@@ -167,7 +167,7 @@ var amoBr = {
         var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
         
         info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-        + amoBr.getString('maxSupportedVer_needsConversion', ["<a href='" + link + "'>", "</a>"]);
+        + amoBr.getString('maxSupportedVer_needsConversion', ["<a style='color: #fff;' href='" + link + "'>", "</a>"]);
       }
       
       infoElem.innerHTML = info;
@@ -185,7 +185,7 @@ var amoBr = {
         info += amoBr.getString('maxSupportedVer_strictForced');
       
       } else {
-        var tagStart = "<a href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
+        var tagStart = "<a style='color: #fff;' href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
         var tagEnd = "</a>";
         info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
       }
@@ -251,10 +251,10 @@ var amoBr = {
     }
     
     var par1 = amoBr.getString('checkForSMVersion_info',
-      ["<a href='" + this.converterURL + "'>", "</a>"]);
+      ["<a style='color: #fff;' href='" + this.converterURL + "'>", "</a>"]);
     
     var par2 = amoBr.getString('convertAddon',
-      ["<a href='" + convertLink + "'>", "</a>"]);
+      ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
     
     infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
       + "<p style='font-size: 10pt; text-align: left'>" + par2 + "</p>";
@@ -309,14 +309,14 @@ var amoBr = {
     var addonData = this.getAddonData();
     if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
       infoElem.innerHTML = amoBr.getString('TbInfo',
-                ["<a href='" + SMLink + "'><b>", "</b></a>",
-                 "<a href='" + converterLink + "'>", "</a>"]) + '<br><br>'
+                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>",
+                 "<a style='color: #fff;' href='" + converterLink + "'>", "</a>"]) + '<br><br>'
               + amoBr.getString('convertAddon',
-                ["<a href='" + convertLink + "'>", "</a>"]);
+                ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
   
     } else {
       infoElem.innerHTML = amoBr.getString('SmVersionExists',
-                ["<a href='" + SMLink + "'><b>", "</b></a>"]);
+                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>"]);
     }
     
     shell.appendChild(infoElem);

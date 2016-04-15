@@ -142,25 +142,37 @@ var amoBr = {
     }
     
     var addonData = this.getAddonData();
-    var info = "";
     
     if (addonData.isCompatible) {
       // add-on is compatible, only maxVersion is too low
       var compatibleByDefault = (Services.vc.compare(addonData.maxVersion, '2.1') >= 0);
+	  
+	  var span1 = content.document.createTextNode("span");
       
       if (compatibleByDefault) {
-        info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-      + amoBr.getString('maxSupportedVer_workFine');
+        var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+        + amoBr.getString('maxSupportedVer_workFine');
+	  
+		infoElem.appendChild(content.document.createTextNode(info));
       
       } else {
         // very old extension - needs conversion
         var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
         
-        info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-        + amoBr.getString('maxSupportedVer_needsConversion', ["<a style='color: #fff;' href='" + link + "'>", "</a>"]);
+        var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+        + amoBr.getString('maxSupportedVer_needsConversion');
+		
+		infoElem.appendChild(content.document.createTextNode(info));
+		
+		var linktext = amoBr.getString('maxSupportedVer_needsConversion_link');
+		
+		var linkNode = content.document.createElement("a");
+		linkNode.style.color = "#fff";
+		linkNode.href = link;
+		infoElem.appendChild(linkNode);
+		linkNode.appendChild(content.document.createTextNode(linktext));
       }
       
-      infoElem.innerHTML = info;
       infoElem.style.color = 'lawngreen';
       
     } else {

@@ -262,14 +262,22 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
     
-    var par1 = amoBr.getString('checkForSMVersion_info',
-      ["<a style='color: #fff;' href='" + this.converterURL + "'>", "</a>"]);
+    var p1 = content.document.createElement('p');
+    p1.style.fontSize = "10pt";
+    p1.style.textAlign = "left";
+    p1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion_info')));
+    infoElem.appendChild(p1);
     
-    var par2 = amoBr.getString('convertAddon',
-      ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
-    
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
-      + "<p style='font-size: 10pt; text-align: left'>" + par2 + "</p>";
+    var p2 = content.document.createElement('p');
+    p1.style.fontSize = "10pt";
+    p1.style.textAlign = "left";
+    var p2_linkNode = content.document.createElement('a');
+    p2_linkNode.style.color = "#fff";
+    p2_linkNode.href = convertLink;
+    p2_linkNode.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_link')));
+    p2.appendChild(p2_linkNode);
+    p2.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_note')));
+    infoElem.appendChild(p2);
     
     hugeButton.parentNode.appendChild(infoElem);
   },

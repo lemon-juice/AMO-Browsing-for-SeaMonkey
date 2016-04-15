@@ -269,14 +269,14 @@ var amoBr = {
     infoElem.appendChild(p1);
     
     var p2 = content.document.createElement('p');
-    p1.style.fontSize = "10pt";
-    p1.style.textAlign = "left";
+    p2.style.fontSize = "10pt";
+    p2.style.textAlign = "left";
     var p2_linkNode = content.document.createElement('a');
     p2_linkNode.style.color = "#fff";
     p2_linkNode.href = convertLink;
     p2_linkNode.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_link')));
     p2.appendChild(p2_linkNode);
-    p2.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_note')));
+    p2.appendChild(content.document.createTextNode(' - ' + amoBr.getString('convertAddon_note')));
     infoElem.appendChild(p2);
     
     hugeButton.parentNode.appendChild(infoElem);
@@ -299,7 +299,13 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
     
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: lawngreen'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
+    var p = content.document.createElement('p');
+    p.style.fontSize = '10pt';
+    p.style.textAlign = 'left';
+    p.style.color = 'lawngreen';
+    p.appendChild(content.document.createTextNode(amoBr.getString('FxAddOnIsCompatible')));
+    
+    infoElem.appendChild(p);
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -328,15 +334,38 @@ var amoBr = {
     
     var addonData = this.getAddonData();
     if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
-      infoElem.innerHTML = amoBr.getString('TbInfo',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>",
-                 "<a style='color: #fff;' href='" + converterLink + "'>", "</a>"]) + '<br><br>'
-              + amoBr.getString('convertAddon',
-                ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
-  
+	  var linkNode1 = content.document.createElement('a');
+	  linkNode1.style.color = "#fff";
+	  linkNode1.style.fontWeight = "bold";
+	  linkNode1.style.display = "block";
+	  linkNode1.href = SMLink;
+      linkNode1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion')));
+      infoElem.appendChild(linkNode1);
+	  
+	  var p1 = content.document.createElement('p');
+      p1.style.fontSize = "10pt";
+      p1.style.textAlign = "left";
+      p1.appendChild(content.document.createTextNode(amoBr.getString('TbInfo')));
+      infoElem.appendChild(p1);
+		
+      var p2 = content.document.createElement('p');
+      p2.style.fontSize = "10pt";
+      p2.style.textAlign = "left";
+      var p2_linkNode = content.document.createElement('a');
+      p2_linkNode.style.color = "#fff";
+      p2_linkNode.href = convertLink;
+      p2_linkNode.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_link')));
+      p2.appendChild(p2_linkNode);
+      p2.appendChild(content.document.createTextNode(' - ' + amoBr.getString('convertAddon_note')));
+      infoElem.appendChild(p2);
     } else {
-      infoElem.innerHTML = amoBr.getString('SmVersionExists',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>"]);
+      var linkNode1 = content.document.createElement('a');
+	  linkNode1.style.color = "#fff";
+	  linkNode1.style.fontWeight = "bold";
+	  linkNode1.style.display = "block";
+	  linkNode1.href = SMLink;
+      linkNode1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion')));
+      infoElem.appendChild(linkNode1);
     }
     
     shell.appendChild(infoElem);

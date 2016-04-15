@@ -142,25 +142,37 @@ var amoBr = {
     }
     
     var addonData = this.getAddonData();
-    var info = "";
     
     if (addonData.isCompatible) {
       // add-on is compatible, only maxVersion is too low
       var compatibleByDefault = (Services.vc.compare(addonData.maxVersion, '2.1') >= 0);
       
+      var span1 = content.document.createTextNode("span");
+      
       if (compatibleByDefault) {
-        info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-      + amoBr.getString('maxSupportedVer_workFine');
+        var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+        + amoBr.getString('maxSupportedVer_workFine');
+      
+        infoElem.appendChild(content.document.createTextNode(info));
       
       } else {
         // very old extension - needs conversion
         var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
         
-        info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-        + amoBr.getString('maxSupportedVer_needsConversion', ["<a style='color: #fff;' href='" + link + "'>", "</a>"]);
+        var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
+        + amoBr.getString('maxSupportedVer_needsConversion') + ' ';
+        
+        infoElem.appendChild(content.document.createTextNode(info));
+        
+        var linktext = amoBr.getString('maxSupportedVer_needsConversion_link');
+        
+        var linkNode = content.document.createElement("a");
+        linkNode.style.color = "#fff";
+        linkNode.href = link;
+        infoElem.appendChild(linkNode);
+        linkNode.appendChild(content.document.createTextNode(linktext));
       }
       
-      infoElem.innerHTML = info;
       infoElem.style.color = 'lawngreen';
       
     } else {
@@ -175,17 +187,27 @@ var amoBr = {
         info += amoBr.getString('maxSupportedVer_strictForced');
       
       } else {
-        var tagStart = "<a style='color: #fff;' href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
-        var tagEnd = "</a>";
-        info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
+        info += amoBr.getString('maxSupportedVer_strict') + ' ';
       }
       
       // grey button:
       button.style.background = '';
       button.classList.add('concealed');
       
-      infoElem.innerHTML = info;
+      infoElem.appendChild(content.document.createTextNode(info));
       infoElem.style.color = 'red';
+      
+      if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
+        var linktext = amoBr.getString('maxSupportedVer_strict_link');
+        
+        var linkNode = content.document.createElement("a");
+        linkNode.style.fontWeight = "bold";
+        linkNode.style.color = "darkred";
+        linkNode.style.textDecoration = "underline";
+        linkNode.href = link;
+        infoElem.appendChild(linkNode);
+        linkNode.appendChild(content.document.createTextNode(linktext));
+      }
     }
   },
   
@@ -240,14 +262,22 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
     
-    var par1 = amoBr.getString('checkForSMVersion_info',
-      ["<a style='color: #fff;' href='" + this.converterURL + "'>", "</a>"]);
+    var p1 = content.document.createElement('p');
+    p1.style.fontSize = "10pt";
+    p1.style.textAlign = "left";
+    p1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion_info')));
+    infoElem.appendChild(p1);
     
-    var par2 = amoBr.getString('convertAddon',
-      ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
-    
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
-      + "<p style='font-size: 10pt; text-align: left'>" + par2 + "</p>";
+    var p2 = content.document.createElement('p');
+    p2.style.fontSize = "10pt";
+    p2.style.textAlign = "left";
+    var p2_linkNode = content.document.createElement('a');
+    p2_linkNode.style.color = "#fff";
+    p2_linkNode.href = convertLink;
+    p2_linkNode.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_link')));
+    p2.appendChild(p2_linkNode);
+    p2.appendChild(content.document.createTextNode(' - ' + amoBr.getString('convertAddon_note')));
+    infoElem.appendChild(p2);
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -269,7 +299,13 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
     
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: lawngreen'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
+    var p = content.document.createElement('p');
+    p.style.fontSize = '10pt';
+    p.style.textAlign = 'left';
+    p.style.color = 'lawngreen';
+    p.appendChild(content.document.createTextNode(amoBr.getString('FxAddOnIsCompatible')));
+    
+    infoElem.appendChild(p);
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -298,15 +334,38 @@ var amoBr = {
     
     var addonData = this.getAddonData();
     if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
-      infoElem.innerHTML = amoBr.getString('TbInfo',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>",
-                 "<a style='color: #fff;' href='" + converterLink + "'>", "</a>"]) + '<br><br>'
-              + amoBr.getString('convertAddon',
-                ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
-  
+	  var linkNode1 = content.document.createElement('a');
+	  linkNode1.style.color = "#fff";
+	  linkNode1.style.fontWeight = "bold";
+	  linkNode1.style.display = "block";
+	  linkNode1.href = SMLink;
+      linkNode1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion')));
+      infoElem.appendChild(linkNode1);
+	  
+	  var p1 = content.document.createElement('p');
+      p1.style.fontSize = "10pt";
+      p1.style.textAlign = "left";
+      p1.appendChild(content.document.createTextNode(amoBr.getString('TbInfo')));
+      infoElem.appendChild(p1);
+		
+      var p2 = content.document.createElement('p');
+      p2.style.fontSize = "10pt";
+      p2.style.textAlign = "left";
+      var p2_linkNode = content.document.createElement('a');
+      p2_linkNode.style.color = "#fff";
+      p2_linkNode.href = convertLink;
+      p2_linkNode.appendChild(content.document.createTextNode(amoBr.getString('convertAddon_link')));
+      p2.appendChild(p2_linkNode);
+      p2.appendChild(content.document.createTextNode(' - ' + amoBr.getString('convertAddon_note')));
+      infoElem.appendChild(p2);
     } else {
-      infoElem.innerHTML = amoBr.getString('SmVersionExists',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>"]);
+      var linkNode1 = content.document.createElement('a');
+	  linkNode1.style.color = "#fff";
+	  linkNode1.style.fontWeight = "bold";
+	  linkNode1.style.display = "block";
+	  linkNode1.href = SMLink;
+      linkNode1.appendChild(content.document.createTextNode(amoBr.getString('checkForSMVersion')));
+      infoElem.appendChild(linkNode1);
     }
     
     shell.appendChild(infoElem);

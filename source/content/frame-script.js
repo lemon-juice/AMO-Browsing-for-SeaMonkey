@@ -146,31 +146,31 @@ var amoBr = {
     if (addonData.isCompatible) {
       // add-on is compatible, only maxVersion is too low
       var compatibleByDefault = (Services.vc.compare(addonData.maxVersion, '2.1') >= 0);
-	  
-	  var span1 = content.document.createTextNode("span");
+      
+      var span1 = content.document.createTextNode("span");
       
       if (compatibleByDefault) {
         var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
         + amoBr.getString('maxSupportedVer_workFine');
-	  
-		infoElem.appendChild(content.document.createTextNode(info));
+      
+        infoElem.appendChild(content.document.createTextNode(info));
       
       } else {
         // very old extension - needs conversion
         var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
         
         var info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-        + amoBr.getString('maxSupportedVer_needsConversion');
-		
-		infoElem.appendChild(content.document.createTextNode(info));
-		
-		var linktext = amoBr.getString('maxSupportedVer_needsConversion_link');
-		
-		var linkNode = content.document.createElement("a");
-		linkNode.style.color = "#fff";
-		linkNode.href = link;
-		infoElem.appendChild(linkNode);
-		linkNode.appendChild(content.document.createTextNode(linktext));
+        + amoBr.getString('maxSupportedVer_needsConversion') + ' ';
+        
+        infoElem.appendChild(content.document.createTextNode(info));
+        
+        var linktext = amoBr.getString('maxSupportedVer_needsConversion_link');
+        
+        var linkNode = content.document.createElement("a");
+        linkNode.style.color = "#fff";
+        linkNode.href = link;
+        infoElem.appendChild(linkNode);
+        linkNode.appendChild(content.document.createTextNode(linktext));
       }
       
       infoElem.style.color = 'lawngreen';
@@ -187,17 +187,27 @@ var amoBr = {
         info += amoBr.getString('maxSupportedVer_strictForced');
       
       } else {
-        var tagStart = "<a style='color: #fff;' href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
-        var tagEnd = "</a>";
-        info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
+        info += amoBr.getString('maxSupportedVer_strict') + ' ';
       }
       
       // grey button:
       button.style.background = '';
       button.classList.add('concealed');
       
-      infoElem.innerHTML = info;
+      infoElem.appendChild(content.document.createTextNode(info));
       infoElem.style.color = 'red';
+      
+      if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
+        var linktext = amoBr.getString('maxSupportedVer_strict_link');
+        
+        var linkNode = content.document.createElement("a");
+        linkNode.style.fontWeight = "bold";
+        linkNode.style.color = "darkred";
+        linkNode.style.textDecoration = "underline";
+        linkNode.href = link;
+        infoElem.appendChild(linkNode);
+        linkNode.appendChild(content.document.createTextNode(linktext));
+      }
     }
   },
   

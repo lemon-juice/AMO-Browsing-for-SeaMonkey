@@ -39,6 +39,42 @@ var amoBr = {
     return this.stringBundle.formatStringFromName(name, params, params.length);
   },
   
+  /* Sanitize html and add it as DOM nodes to parent element.
+   * Only text nodes and a few simple elements and attributes will
+   * be accepted. Doesn't work with nested elements.
+   */
+  addSanitizedHtmlASDom: function(parent, html) {
+    var parser = new content.DOMParser();
+    var body = parser.parseFromString(html, "text/html").body;
+    
+    for (var i=0; i<body.childNodes.length; i++) {
+      var sourceNode = body.childNodes[i];
+      
+      if (sourceNode.nodeName == '#text') {
+        var newNode = content.document.createTextNode(sourceNode.data);
+        
+      // allow only these HTML tags:
+      } else if (sourceNode.nodeName == 'A'
+        || sourceNode.nodeName == 'EM'
+        || sourceNode.nodeName == 'P'
+        || sourceNode.nodeName == 'BR') {
+        var newNode = content.document.createElement(sourceNode.nodeName);
+        newNode.textContent = sourceNode.textContent;
+        
+        // allow only these attributes:
+        if (sourceNode.getAttribute('href')) {
+          newNode.setAttribute('href', sourceNode.getAttribute('href'));
+        }
+        
+        if (sourceNode.getAttribute('style')) {
+          newNode.setAttribute('style', sourceNode.getAttribute('style'));
+        }
+      }
+      
+      parent.appendChild(newNode);
+    }
+  },
+  
   /* Receiving message from addMessageListener */
   receiveMessage: function(aMsg) {
     switch (aMsg.name) {
@@ -65,6 +101,7 @@ var amoBr = {
       return;
     }
     
+    this.addStyleSheet();
     var app = this.detectAppNameForPage();
     
     if (this.isAddonPage()) {
@@ -99,6 +136,13 @@ var amoBr = {
     }
   },
   
+  addStyleSheet: function() {
+    var link = content.document.createElement('link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('href', 'chrome://amobrowsing/content/style.css');
+    content.document.head.appendChild(link);
+  },
+  
   /* Modify SeaMonkey add-on page */
   modifySeaMonkeyPage: function() {
     var buttons = content.document.querySelectorAll('p.install-button a.button.add.concealed, p.install-button a.button.contrib.go.concealed');
@@ -113,7 +157,7 @@ var amoBr = {
     
     if (!button.classList.contains('caution')) {
       // fully reviewed (not preliminarily) add-on - add amber bg
-      button.style.background = '#b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0';
+      button.classList.add('amobrowsing-amber');
     }
     
     var extra = content.document.querySelector('div.install-shell div.extra');
@@ -122,20 +166,17 @@ var amoBr = {
       return;
     }
     
-    extra.style.opacity = '0.5';
+    extra.style.opacity = '0.6';
     
     var label = content.document.createElement('div');
-    label.style.margin = '1.5em 0 0.5em';
-    label.style.fontSize = '90%';
-    label.style.fontStyle = 'italic';
     label.textContent = this.getString('officialStatus');
+    label.className = 'amobrowsing-official-status';
     extra.insertBefore(label, extra.firstChild);
     
     var infoElem = content.document.createElement('div');
     extra.parentNode.insertBefore(infoElem, extra);
     
-    infoElem.style.lineHeight = '1.4';
-    infoElem.style.fontWeight = 'bold';
+    infoElem.classList.add('amobrowsing-sm-compat-info');
     
     if (this.isContribPage()) {
       infoElem.style.maxWidth = '400px';
@@ -150,18 +191,18 @@ var amoBr = {
       
       if (compatibleByDefault) {
         info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-      + amoBr.getString('maxSupportedVer_workFine');
+          + amoBr.getString('maxSupportedVer_workFine');
       
       } else {
         // very old extension - needs conversion
         var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
         
         info = amoBr.getString('maxSupportedVer', addonData.maxVersion) + ' '
-        + amoBr.getString('maxSupportedVer_needsConversion', ["<a style='color: #fff;' href='" + link + "'>", "</a>"]);
+        + amoBr.getString('maxSupportedVer_needsConversion', ["<a href='" + link + "'>", "</a>"]);
       }
       
-      infoElem.innerHTML = info;
-      infoElem.style.color = 'lawngreen';
+      amoBr.addSanitizedHtmlASDom(infoElem, info);
+      infoElem.classList.add('compatible');
       
     } else {
       // maxVersion is too low and probably strict compatibility is enforced
@@ -175,7 +216,7 @@ var amoBr = {
         info += amoBr.getString('maxSupportedVer_strictForced');
       
       } else {
-        var tagStart = "<a style='color: #fff;' href='" + link + "' style='font-weight: bold; color: darkred; text-decoration: underline;'>";
+        var tagStart = "<a href='" + link + "'>";
         var tagEnd = "</a>";
         info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
       }
@@ -184,8 +225,8 @@ var amoBr = {
       button.style.background = '';
       button.classList.add('concealed');
       
-      infoElem.innerHTML = info;
-      infoElem.style.color = 'red';
+      amoBr.addSanitizedHtmlASDom(infoElem, info);
+      infoElem.classList.add('incompatible');
     }
   },
   
@@ -233,7 +274,7 @@ var amoBr = {
     var convertLink = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
     
     var infoElem = content.document.createElement('div');
-    infoElem.style.marginBottom = '1em';
+    infoElem.className = 'amobrowsing-info';
     
     if (this.isContribPage()) {
       infoElem.style.marginTop = '0.5em';
@@ -241,13 +282,19 @@ var amoBr = {
     }
     
     var par1 = amoBr.getString('checkForSMVersion_info',
-      ["<a style='color: #fff;' href='" + this.converterURL + "'>", "</a>"]);
+      ["<a href='" + this.converterURL + "'>", "</a>"]);
     
     var par2 = amoBr.getString('convertAddon',
-      ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
+      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
     
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left'>" + par1 + "</p>"
-      + "<p style='font-size: 10pt; text-align: left'>" + par2 + "</p>";
+    var p1 = content.document.createElement('p');
+    amoBr.addSanitizedHtmlASDom(p1, par1);
+    
+    var p2 = content.document.createElement('p');
+    amoBr.addSanitizedHtmlASDom(p2, par2);
+    
+    infoElem.appendChild(p1);
+    infoElem.appendChild(p2);
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -262,14 +309,15 @@ var amoBr = {
     hugeButton.href = downloadAnywayButton.href;
     
     var infoElem = content.document.createElement('div');
-    infoElem.style.marginBottom = '1em';
+    infoElem.className = 'amobrowsing-sm-compat-info compatible';
     
     if (this.isContribPage()) {
       infoElem.style.marginTop = '0.5em';
       infoElem.style.maxWidth = '400px';
     }
     
-    infoElem.innerHTML = "<p style='font-size: 10pt; text-align: left; color: lawngreen'>" + amoBr.getString('FxAddOnIsCompatible') + "</p>";
+    var p = content.document.createElement('p');
+    amoBr.addSanitizedHtmlASDom(infoElem, amoBr.getString('FxAddOnIsCompatible'));
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -283,8 +331,7 @@ var amoBr = {
     }
   
     var infoElem = content.document.createElement('div');
-    infoElem.style.marginTop = '1em';
-    infoElem.style.lineHeight = '1.4';
+    infoElem.className = 'amobrowsing-info';
 
     if (this.isContribPage()) {
       infoElem.style.maxWidth = '400px';
@@ -297,18 +344,21 @@ var amoBr = {
     
     
     var addonData = this.getAddonData();
+    var info = '';
+    
     if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
-      infoElem.innerHTML = amoBr.getString('TbInfo',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>",
-                 "<a style='color: #fff;' href='" + converterLink + "'>", "</a>"]) + '<br><br>'
+      info = amoBr.getString('TbInfo',
+                ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>",
+                 "<a  href='" + converterLink + "'>", "</a>"]) + '<br/><br/>'
               + amoBr.getString('convertAddon',
-                ["<a style='color: #fff;' href='" + convertLink + "'>", "</a>"]);
+                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
   
     } else {
-      infoElem.innerHTML = amoBr.getString('SmVersionExists',
-                ["<a style='color: #fff;' href='" + SMLink + "'><b>", "</b></a>"]);
+      info = amoBr.getString('SmVersionExists',
+                ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>"]);
     }
     
+    amoBr.addSanitizedHtmlASDom(infoElem, info);
     shell.appendChild(infoElem);
   },
 

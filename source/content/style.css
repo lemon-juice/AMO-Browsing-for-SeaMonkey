@@ -1,0 +1,46 @@
+div.amobrowsing-info {
+  color: white;
+  font-size: 10pt;
+  text-align: left;
+  margin: 0.5em 0 1em 0;
+  border: 1px solid rgba(255,255,255,0.7);
+  padding: 0.5em 0.8em;
+  background: rgba(255,255,255,0.15);
+}
+div.amobrowsing-info a {
+  color: white;
+  text-decoration: underline;
+}
+div.amobrowsing-info p {
+  margin: 0.5em 0;
+}
+
+a.amobrowsing-amber {
+  background: #b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0 !important;
+}
+div.amobrowsing-sm-compat-info {
+  line-height: 1.4;
+  font-weight: bold;
+  padding: 0.2em;
+}
+div.amobrowsing-sm-compat-info a {
+  text-decoration: underline;
+  color: white;
+}
+div.amobrowsing-sm-compat-info.compatible {
+  color: lawngreen;
+}
+div.amobrowsing-sm-compat-info.incompatible {
+  color: red;
+  background: rgba(255,255,255,0.9);
+}
+div.amobrowsing-sm-compat-info.incompatible a {
+  color: red;
+}
+
+div.amobrowsing-official-status {
+  font-style: italic;
+  font-size: 90%;
+  margin: 1.5em 0 0.5em;
+  color: white;
+}

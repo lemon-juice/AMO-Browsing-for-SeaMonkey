@@ -7,9 +7,22 @@ div.amobrowsing-info {
   padding: 0.5em 0.8em;
   background: rgba(255,255,255,0.15);
 }
+/* contribution page is white (not blue) */
 div.amobrowsing-info a {
   color: white;
   text-decoration: underline;
+}
+#contribution div.amobrowsing-info,
+#contribution div.amobrowsing-info a {
+  color: black;
+}
+/* fix AMO: white link on white bg */
+#contribution span.more-versions a,
+#contribution a#downloadAnyway {
+  color: black;
+}
+#contribution div.amobrowsing-info p {
+  margin-right: 0;
 }
 div.amobrowsing-info p {
   margin: 0.5em 0;

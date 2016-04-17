@@ -242,6 +242,7 @@ var amoBr = {
     
     if (hugeButtons.length > 0) {
       var addOnData = this.getAddonData();
+      var prevHref;
       
       for (var i=0; i<hugeButtons.length; i++) {
         var hugeButton = hugeButtons[i];
@@ -251,6 +252,14 @@ var amoBr = {
           continue;
         }
         
+        if (hugeButton.href === prevHref) {
+          // same button repeated - this happens on multi-platform add-on
+          // pages (AMO bug) - hide it
+          hugeButton.style.setProperty('display', 'none', 'important');
+          continue;
+        }
+        
+        prevHref = hugeButton.href;
         var downloadAnywayButton = content.document.getElementById('downloadAnyway');
         
         if (this.workingFxAddOns.indexOf(addOnData.addonId) >= 0 && downloadAnywayButton) {

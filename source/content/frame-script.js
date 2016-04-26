@@ -83,7 +83,7 @@ var amoBr = {
   },
   
   registerEvents: function() {
-    // start observing link changes after document is created before page scripts
+    // start observing link changes after document is created
     this.documentInitObserver = {
         observe: function(aSubject, aTopic, aData) {
           if ("document-element-inserted" == aTopic) {
@@ -170,10 +170,13 @@ var amoBr = {
     //amoBr.grabbedLinks = [];
     
     var observer = new content.MutationObserver(function(mutations) {
+      if (content.document.location.host != 'addons.mozilla.org'
+          || content.document.location.protocol != 'https:') {
+        // quit if not AMO
+        return;
+      }
       
-      for (var m=0; m<mutations.length; m++) {
-        var mutation = mutations[m];
-        
+      mutations.forEach(function(mutation) {
         var target = mutation.target;
         
         if (target.nodeName == 'A'
@@ -182,7 +185,7 @@ var amoBr = {
           target.setAttribute('data-realurl', mutation.oldValue);
           //amoBr.grabbedLinks.push(mutation.oldValue);
         }
-      }    
+      });
     });
     
     var target = content.document;
@@ -193,6 +196,12 @@ var amoBr = {
   //displayGrabbedLinks: function() {
   //  var wrapper = content.document.createElement('div');
   //  wrapper.innerHTML = this.grabbedLinks.join('<br>\n');
+  //  content.document.body.insertBefore(wrapper, content.document.body.firstChild);
+  //},
+  //
+  //appendDebug: function(txt) {
+  //  var wrapper = content.document.createElement('div');
+  //  wrapper.textContent = txt;
   //  content.document.body.insertBefore(wrapper, content.document.body.firstChild);
   //},
   

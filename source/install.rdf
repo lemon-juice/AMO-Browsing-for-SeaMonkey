@@ -3,7 +3,7 @@
          xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <rdf:Description rdf:about="urn:mozilla:install-manifest">
     <em:id>amobrowsing@seamonkey.mozilla.org</em:id>
-    <em:version>0.9.12</em:version>
+    <em:version>0.9.13</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -12,7 +12,7 @@
       <Description>
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.22</em:minVersion>
-        <em:maxVersion>2.42.*</em:maxVersion>
+        <em:maxVersion>2.45.*</em:maxVersion>
       </Description>
     </em:targetApplication>
  

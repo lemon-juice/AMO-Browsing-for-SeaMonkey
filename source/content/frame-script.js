@@ -23,6 +23,19 @@ var amoBr = {
     this.stringBundle = Services.strings.createBundle('chrome://amobrowsing/locale/global.properties?' + Math.random()); // Randomize URI to work around bug 719376
 
     addMessageListener("AMOBrowsing:removeEvents", this);
+    
+    // start observing link changes after document is created
+    Components.classes["@mozilla.org/observer-service;1"]
+      .getService(Components.interfaces.nsIObserverService)
+      .addObserver({
+        
+        observe: function(aSubject, aTopic, aData) {
+          if ("document-element-inserted" == aTopic) {
+            amoBr.observeDownloadLinksChanges();
+        }
+      }
+    }, "document-element-inserted", false);
+  
     this.registerEvents();
   },
   
@@ -101,6 +114,7 @@ var amoBr = {
       return;
     }
     
+    //this.displayGrabbedLinks();
     this.addStyleSheet();
     var app = this.detectAppNameForPage();
     
@@ -135,6 +149,42 @@ var amoBr = {
       this.modifyHoverCards();
     }
   },
+  
+  /**
+   * Watch for AMO scripts trying to replace download links with a link for downloading Fx.
+   * This happens on version pages. We save the links to a different attribute, which is used
+   * later to put them back in.
+   */
+  observeDownloadLinksChanges: function() {
+    
+    //amoBr.grabbedLinks = [];
+    
+    var observer = new content.MutationObserver(function(mutations) {
+      
+      for (var m=0; m<mutations.length; m++) {
+        var mutation = mutations[m];
+        
+        var target = mutation.target;
+        
+        if (target.nodeName == 'A'
+            && target.classList.contains('download')
+            && !target.getAttribute('data-realurl')) {
+          target.setAttribute('data-realurl', mutation.oldValue);
+          //amoBr.grabbedLinks.push(mutation.oldValue);
+        }
+      }    
+    });
+    
+    var target = content.document;
+    observer.observe(target, { childList: false, attributes: true, attributeOldValue: true, subtree: true, attributeFilter: ['href'] });
+  },
+  
+  // for debugging:
+  //displayGrabbedLinks: function() {
+  //  var wrapper = content.document.createElement('div');
+  //  wrapper.innerHTML = this.grabbedLinks.join('<br>\n');
+  //  content.document.body.insertBefore(wrapper, content.document.body.firstChild);
+  //},
   
   addStyleSheet: function() {
     var link = content.document.createElement('link');
@@ -270,6 +320,22 @@ var amoBr = {
         }
       }
     }
+    
+    // section with versions below
+    hugeButtons = content.document.querySelectorAll('section.primary.island.more-island p.install-button a.button.concealed.CTA');
+    
+    for (var i=0; i<hugeButtons.length; i++) {
+      var hugeButton = hugeButtons[i];
+      
+      if (!this.isElementHidden(hugeButton)) {
+        // remove the huge appearance of the button
+        hugeButton.classList.remove('CTA');
+        
+        hugeButton.href = hugeButton.getAttribute('data-realurl');
+        hugeButton.textContent = this.getString('download');
+      }
+    }
+    
   },
   
   /* On Fx page - replace huge button with info to check for SM version */
@@ -557,7 +623,7 @@ var amoBr = {
     
     // on Fx beta version page - replace huge "only with Firefox" buttons
     // with download buttons
-    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.caution.concealed.CTA[data-realurl]');
+    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.concealed.CTA[data-realurl]');
     
     var modified = false;
     

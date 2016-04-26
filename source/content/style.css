@@ -57,3 +57,18 @@ div.amobrowsing-official-status {
   margin: 1.5em 0 0.5em;
   color: white;
 }
+
+/* always show install button on version pages, not only on hover */
+body.versions .listing .item .install-shell {
+    visibility: visible !important;
+}
+/* hide useless red icon */
+body.versions .extra .button.not-available,
+section.primary.island.more-island .button.not-available {
+  background-image: none;
+}
+
+/* make all buttons clickable as they should be */
+.button.caution.concealed, .button.disabled, button[disabled] {
+    pointer-events: auto !important;
+}

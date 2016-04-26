@@ -23,19 +23,6 @@ var amoBr = {
     this.stringBundle = Services.strings.createBundle('chrome://amobrowsing/locale/global.properties?' + Math.random()); // Randomize URI to work around bug 719376
 
     addMessageListener("AMOBrowsing:removeEvents", this);
-    
-    // start observing link changes after document is created
-    Components.classes["@mozilla.org/observer-service;1"]
-      .getService(Components.interfaces.nsIObserverService)
-      .addObserver({
-        
-        observe: function(aSubject, aTopic, aData) {
-          if ("document-element-inserted" == aTopic) {
-            amoBr.observeDownloadLinksChanges();
-        }
-      }
-    }, "document-element-inserted", false);
-  
     this.registerEvents();
   },
   
@@ -96,6 +83,20 @@ var amoBr = {
   },
   
   registerEvents: function() {
+    // start observing link changes after document is created before page scripts
+    this.documentInitObserver = {
+        observe: function(aSubject, aTopic, aData) {
+          if ("document-element-inserted" == aTopic) {
+            amoBr.observeDownloadLinksChanges();
+        }
+      }
+    };
+    
+    Components.classes["@mozilla.org/observer-service;1"]
+      .getService(Components.interfaces.nsIObserverService)
+      .addObserver(this.documentInitObserver, "document-element-inserted", false);
+
+    
     addEventListener("DOMContentLoaded", this, false);
   },
   
@@ -103,6 +104,11 @@ var amoBr = {
   removeEvents: function() {
     removeEventListener("DOMContentLoaded", this, false);
     removeMessageListener("AMOBrowsing:removeEvents", this);
+    
+    // remove observers
+    Components.classes["@mozilla.org/observer-service;1"]
+      .getService(Components.interfaces.nsIObserverService)
+      .removeObserver(this.documentInitObserver, "document-element-inserted");
   },
   
   /* Handle DOMContentLoaded event */
@@ -156,6 +162,10 @@ var amoBr = {
    * later to put them back in.
    */
   observeDownloadLinksChanges: function() {
+    if (!content) {
+      // sometimes observer calls this function when content is null (I don't know why)
+      return;
+    }
     
     //amoBr.grabbedLinks = [];
     

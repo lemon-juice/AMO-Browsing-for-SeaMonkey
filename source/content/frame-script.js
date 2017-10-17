@@ -113,48 +113,52 @@ var amoBr = {
   
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
-    if (e.target.defaultView.frameElement // ignore frames
-        || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
-        || !content.document.body
-        ) {
-      return;
-    }
-    
-    //this.displayGrabbedLinks();
-    this.addStyleSheet();
-    var app = this.detectAppNameForPage();
-    
-    if (this.isAddonPage()) {
-      if (app == 'seamonkey') {
-        this.modifySeaMonkeyPage();
-        
-        var target = content.document.getElementById('page');
-        
-        if (target) {
-          this.addHoverCardObserver(target);
+    /* Delay until AMO scripts have run */
+    content.setTimeout(() => {
+      if (e.target.defaultView.frameElement // ignore frames
+          || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
+          || !content.document.body
+          ) {
+        return;
+      }
+      
+      //this.displayGrabbedLinks();
+      this.addStyleSheet();
+      var app = this.detectAppNameForPage();
+      
+      if (this.isAddonPage()) {
+        if (app == 'seamonkey') {
+          this.modifySeaMonkeyPage();
+          
+          var target = content.document.getElementById('page');
+          
+          if (target) {
+            this.addHoverCardObserver(target);
+          }
+          
+        } else if (app == 'firefox') {
+          this.modifyFirefoxPage();
+          
+        } else if (app == 'thunderbird') {
+          this.modifyThunderbirdPage();
         }
         
-      } else if (app == 'firefox') {
-        this.modifyFirefoxPage();
+      } else {
+        // not add-on page
+        if (this.isListingPage()) {
+          this.modifyListing();
+          this.addSearchResultsObserver();
         
-      } else if (app == 'thunderbird') {
-        this.modifyThunderbirdPage();
+        } else if (this.isVersionsPage()) {
+          this.modifyVersionsPage();
+        }
+        
+        this.modifyCollectionListing();
+        this.modifyHoverCards();
       }
-      
-    } else {
-      // not add-on page
-      if (this.isListingPage()) {
-        this.modifyListing();
-        this.addSearchResultsObserver();
-      
-      } else if (this.isVersionsPage()) {
-        this.modifyVersionsPage();
-      }
-      
-      this.modifyCollectionListing();
-      this.modifyHoverCards();
-    }
+    }, 0);
   },
+
   
   /**
    * Watch for AMO scripts trying to replace download links with a link for downloading Fx.

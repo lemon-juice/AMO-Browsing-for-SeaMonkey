@@ -463,11 +463,15 @@ var amoBr = {
 
   /* Modify add-on listing page, e.g. "Up & Coming Extensions" */
   modifyListing: function() {
-    var items = content.document.querySelectorAll('div.listing div.items > div.item.incompatible');
+    // remove huge "only with Firefox" buttons
+    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.CTA[data-realurl]');
     
-    for (var i=0; i<items.length; i++) {
-      var item = items[i];
-      item.classList.remove('incompatible');
+    for (var i=0; i<hugeButtons.length; i++) {
+      var item = hugeButtons[i];
+	  while (item && !item.classList.contains('item')) {
+		item = item.parentElement;
+	  }
+	  if (!item) continue;
       
       var action = item.querySelector('div.action');
       

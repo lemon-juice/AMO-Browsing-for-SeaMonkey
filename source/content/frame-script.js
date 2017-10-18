@@ -307,10 +307,10 @@ var amoBr = {
   modifyFirefoxPage: function() {
     
     // sometimes there may be 3 huge buttons, each for different OS
-    var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.concealed.CTA');
+    var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.CTA');
     
     if (hugeButtons.length == 0) {
-      hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.concealed.CTA');
+      hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.CTA');
     }
     
     if (hugeButtons.length > 0) {
@@ -345,7 +345,7 @@ var amoBr = {
     }
     
     // section with versions below
-    hugeButtons = content.document.querySelectorAll('section.primary.island.more-island p.install-button a.button.concealed.CTA');
+    hugeButtons = content.document.querySelectorAll('section.primary.island.more-island p.install-button a.button.CTA');
     
     for (var i=0; i<hugeButtons.length; i++) {
       var hugeButton = hugeButtons[i];
@@ -516,7 +516,7 @@ var amoBr = {
     for (var i=0; i<items.length; i++) {
       var item = items[i];
       var link = item.querySelector('h3 a');
-      var linkButtons = item.querySelectorAll('p.install-button a.button.concealed.CTA');
+      var linkButtons = item.querySelectorAll('p.install-button a.button.CTA');
       
       if (!link) {
         continue;
@@ -646,7 +646,7 @@ var amoBr = {
     
     // on Fx beta version page - replace huge "only with Firefox" buttons
     // with download buttons
-    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.concealed.CTA[data-realurl]');
+    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.CTA[data-realurl]');
     
     var modified = false;
     

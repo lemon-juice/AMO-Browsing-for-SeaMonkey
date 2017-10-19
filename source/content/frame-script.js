@@ -226,7 +226,7 @@ var amoBr = {
     var button = buttons[0];
     
     button = this.removeEventsFromElem(button);
-    button.classList.remove('concealed');
+    content.setTimeout(() => button.classList.remove('concealed'), 0);
     
     if (!button.classList.contains('caution')) {
       // fully reviewed (not preliminarily) add-on - add amber bg

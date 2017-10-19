@@ -72,3 +72,8 @@ section.primary.island.more-island .button.not-available {
 .button.caution.concealed, .button.disabled, button[disabled] {
     pointer-events: auto !important;
 }
+
+/* WebExtensions not compatible with SeaMonkey yet */
+div a.is-webextension, span.featured {
+    background-color: #930;
+}

@@ -339,7 +339,9 @@ var amoBr = {
           this.FxPageAddOnIsCompatible(hugeButton, downloadAnywayButton);
           
         } else {
-          this.FxPageCheckForSMVersion(hugeButton);
+          if (content.document.querySelector('#addon .is-webextension') == null) {
+            this.FxPageCheckForSMVersion(hugeButton);
+          }
         }
       }
     }
@@ -468,10 +470,10 @@ var amoBr = {
     
     for (var i=0; i<hugeButtons.length; i++) {
       var item = hugeButtons[i];
-	  while (item && !item.classList.contains('item')) {
-		item = item.parentElement;
-	  }
-	  if (!item) continue;
+      while (item && !item.classList.contains('item')) {
+        item = item.parentElement;
+      }
+      if (!item) continue;
       
       var action = item.querySelector('div.action');
       
@@ -483,7 +485,9 @@ var amoBr = {
         div.style.fontSize = '8pt';
         div.style.textAlign = 'center';
         div.style.lineHeight = '1.4';
-        div.textContent = amoBr.getString('visitAddOn');
+        div.textContent = item.querySelector('.is-webextension')
+          ? amoBr.getString('notCompatible')
+          : amoBr.getString('visitAddOn');
         
         action.textContent = '';
         action.appendChild(div);

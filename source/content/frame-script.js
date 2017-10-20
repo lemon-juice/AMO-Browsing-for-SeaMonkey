@@ -466,7 +466,7 @@ var amoBr = {
   /* Modify add-on listing page, e.g. "Up & Coming Extensions" */
   modifyListing: function() {
     // remove huge "only with Firefox" buttons
-    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.CTA[data-realurl]');
+    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.CTA');
     
     for (var i=0; i<hugeButtons.length; i++) {
       var item = hugeButtons[i];

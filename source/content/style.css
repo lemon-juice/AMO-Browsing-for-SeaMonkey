@@ -74,6 +74,6 @@ section.primary.island.more-island .button.not-available {
 }
 
 /* WebExtensions not compatible with SeaMonkey yet */
-div a.is-webextension, span.featured {
+div a.is-webextension {
     background-color: #930;
 }

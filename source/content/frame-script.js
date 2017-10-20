@@ -341,6 +341,8 @@ var amoBr = {
         } else {
           if (content.document.querySelector('#addon .is-webextension') == null) {
             this.FxPageCheckForSMVersion(hugeButton);
+          } else {
+            this.FxPageWebExtensionsMessage(hugeButton);
           }
         }
       }
@@ -397,6 +399,30 @@ var amoBr = {
     infoElem.appendChild(p2);
     
     hugeButton.parentNode.appendChild(infoElem);
+  },
+  
+  /* On Fx page - let user know that WebExtensions are not supported */
+  FxPageWebExtensionsMessage: function(hugeButton) {
+    var versionsLink = content.document.location.pathname.replace('/firefox/', '/seamonkey/') + 'versions/';
+    
+    var infoElem = content.document.createElement('div');
+    infoElem.className = 'amobrowsing-info';
+    
+    if (this.isContribPage()) {
+      infoElem.style.marginTop = '0.5em';
+      infoElem.style.maxWidth = '400px';
+    }
+    
+    var par1 = amoBr.getString('webExtensions_info',
+      ["<a href='" + versionsLink + "'>", "</a>"]);
+    
+    var p1 = content.document.createElement('p');
+    amoBr.addSanitizedHtmlASDom(p1, par1);
+    
+    infoElem.appendChild(p1);
+    
+    hugeButton.parentNode.appendChild(infoElem);
+    hugeButton.style.display = 'none';
   },
   
    
@@ -640,48 +666,32 @@ var amoBr = {
   },
   
   modifyVersionsPage: function() {
-    // activate download buttons that may be unclickable
-    var buttons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.caution.add.concealed');
+    // remove buttons for non-SM compatible addons that say "Download Now" instead of "Add to SeaMonkey"
+    var buttons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download');
     
     for (var i=0; i<buttons.length; i++) {
-      var button = buttons[i];
-      
-      if (!this.isElementHidden(button)) {
-        // this makes the button clickable
-        button.classList.remove('caution');
+      var item = buttons[i];
+      while (item && !item.classList.contains('item')) {
+        item = item.parentElement;
       }
-    }
-    
-    // on Fx beta version page - replace huge "only with Firefox" buttons
-    // with download buttons
-    var hugeButtons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download.CTA[data-realurl]');
-    
-    var modified = false;
-    
-    for (var i=0; i<hugeButtons.length; i++) {
-      var hugeButton = hugeButtons[i];
+      if (!item) continue;
       
-      if (!this.isElementHidden(hugeButton)) {
-        // remove the huge appearance of the button
-        hugeButton.classList.remove('CTA');
-        
-        // this makes the button clickable
-        hugeButton.classList.remove('caution');
-        
-        hugeButton.href = hugeButton.getAttribute('data-realurl');
-        hugeButton.textContent = this.getString('download');
-        
-        modified = true;
-      }
-    }
-    
-    if (modified) {
-      // hide the download anyway button because it's redundant now and points
-      // to a wrong version, anyway
-      var dAnyway = content.document.querySelector('a#downloadAnyway');
+      var action = item.querySelector('div.action');
       
-      if (dAnyway) {
-        dAnyway.style.display = 'none';
+      if (action) {
+        var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
+        
+        var div = content.document.createElement('div');
+        div.style.display = 'inline-block';
+        div.style.maxWidth = '170px';
+        div.style.color = '#999';
+        div.style.fontSize = '8pt';
+        div.style.textAlign = 'center';
+        div.style.lineHeight = '1.4';
+        div.innerHTML = amoBr.getString('notCompatible');
+        
+        action.textContent = '';
+        action.appendChild(div);
       }
     }
   },

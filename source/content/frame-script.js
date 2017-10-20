@@ -679,8 +679,6 @@ var amoBr = {
       var action = item.querySelector('div.action');
       
       if (action) {
-        var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
-        
         var div = content.document.createElement('div');
         div.style.display = 'inline-block';
         div.style.maxWidth = '170px';
@@ -689,6 +687,20 @@ var amoBr = {
         div.style.textAlign = 'center';
         div.style.lineHeight = '1.4';
         div.innerHTML = amoBr.getString('notCompatible');
+      
+        var compat = item.querySelector('span.meta.compat');
+        if (compat) {
+          // Parse the compatibility string to figure out if this uses WebExtensions or not
+          var match = /Firefox.*- ?([0-9]+)/.exec(compat.innerText);
+          if (match) {
+            var maxVer = +match[1];
+            if (maxVer <= 56) {
+              var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
+              div.innerHTML = amoBr.getString('convertAddon',
+                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
+            }
+          }
+        }
         
         action.textContent = '';
         action.appendChild(div);

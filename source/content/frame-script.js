@@ -155,8 +155,49 @@ var amoBr = {
         
         this.modifyCollectionListing();
         this.modifyHoverCards();
+        
+        var addonDetails = content.document.querySelector('.Addon-details');
+        if (addonDetails) {
+          this.modifyNewSite(addonDetails);
+        }
       }
     }, 0);
+  },
+  
+  
+  modifyNewSite: function (addonDetails) {
+    var newSiteMessage = content.document.createElement("div");
+    newSiteMessage.textContent = this.getString('newSiteMessage');
+    addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
+    
+    var newSiteOptions = content.document.createElement('ul');
+    newSiteMessage.appendChild(newSiteOptions);
+    
+    var li = content.document.createElement('li');
+    newSiteOptions.appendChild(li);
+    var a = content.document.createElement('a');
+    li.appendChild(a);
+    a.href = this.convertURLToSM(content.location.href);
+    a.innerText = this.getString('checkForSMVersion');
+    
+    var historyLink = content.document.querySelector('.AddonMoreInfo-version-history-link');
+    if (historyLink) {
+      var li = content.document.createElement('li');
+      newSiteOptions.appendChild(li);
+      var a = content.document.createElement('a');
+      li.appendChild(a);
+      a.href = historyLink.href;
+      a.innerText = this.getString('viewPreviousVersions');
+    }
+    
+    var installButton = content.document.querySelector('a.InstallButton-button');
+    var linkToPass = installButton ? installButton.href : content.location.href;
+    var convertLink = this.converterURL + "?url=" + encodeURIComponent(linkToPass);
+    var par2 = amoBr.getString('convertAddon',
+      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
+    var li = content.document.createElement('li');
+    newSiteOptions.appendChild(li);
+    li.innerHTML = par2;
   },
 
   
@@ -311,6 +352,16 @@ var amoBr = {
     
     if (hugeButtons.length == 0) {
       hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.CTA');
+    }
+    
+    // new version of AMO
+    if (hugeButtons.length == 0) {
+      var addonDetails = document.querySelector(".Addon-details");
+      if (addonDetails) {
+        var newButton = document.createElement("button");
+        addonDetails.parentElement.insertBefore(newButton, addonDetails);
+        hugeButtons = [newButton];
+      }
     }
     
     if (hugeButtons.length > 0) {

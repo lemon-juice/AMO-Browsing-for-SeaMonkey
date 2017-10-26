@@ -1,4 +1,6 @@
 /amo-browsing.komodoproject
 /build.bat
-/*.xpi
 /graphics
+
+*.xpi
+.vs

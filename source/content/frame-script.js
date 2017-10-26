@@ -10,12 +10,24 @@ var newAmoBr = {
     return amoBr.getString(name, params);
   },
 
-  /* Convert URL of Fx or TB addon page to SM addon page */
-  convertURLToSM: function (url) {
-    return amoBr.convertURLToSM(url);
+  /* Get numeric add-on ID, if present */
+  getAddonId: function () {
+    const addonDiv = content.document.querySelector('.Addon');
+    if (addonDiv) {
+      return addonDiv.getAttribute("data-site-identifier");
+    }
+    return null;
+  },
+
+  /* Get all versions of add-on */
+  getVersions: async function (id) {
+    const resp = await content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`);
+    return await resp.json();
   },
 
   modifyNewSite: function () {
+    this.getVersions(this.getAddonId()).then(x => content.console.log(x));
+
     var addonDetails = content.document.querySelector('.Addon-details');
 
     var newSiteMessage = content.document.createElement("div");
@@ -29,7 +41,7 @@ var newAmoBr = {
     newSiteOptions.appendChild(li);
     var a = content.document.createElement('a');
     li.appendChild(a);
-    a.href = this.convertURLToSM(content.location.href);
+    a.href = amoBr.convertURLToSM(content.location.href);
     a.innerText = this.getString('checkForSMVersion');
 
     var historyLink = content.document.querySelector('.AddonMoreInfo-version-history-link');

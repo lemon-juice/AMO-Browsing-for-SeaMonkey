@@ -2,6 +2,57 @@
   
 Components.utils.import("resource://gre/modules/Services.jsm");
 
+var newAmoBr = {
+  converterURL: 'http://addonconverter.fotokraina.com/',
+
+  /* Get localized string */
+  getString: function (name, params) {
+    return amoBr.getString(name, params);
+  },
+
+  /* Convert URL of Fx or TB addon page to SM addon page */
+  convertURLToSM: function (url) {
+    return amoBr.convertURLToSM(url);
+  },
+
+  modifyNewSite: function () {
+    var addonDetails = content.document.querySelector('.Addon-details');
+
+    var newSiteMessage = content.document.createElement("div");
+    newSiteMessage.textContent = this.getString('newSiteMessage');
+    addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
+
+    var newSiteOptions = content.document.createElement('ul');
+    newSiteMessage.appendChild(newSiteOptions);
+
+    var li = content.document.createElement('li');
+    newSiteOptions.appendChild(li);
+    var a = content.document.createElement('a');
+    li.appendChild(a);
+    a.href = this.convertURLToSM(content.location.href);
+    a.innerText = this.getString('checkForSMVersion');
+
+    var historyLink = content.document.querySelector('.AddonMoreInfo-version-history-link');
+    if (historyLink) {
+      var li = content.document.createElement('li');
+      newSiteOptions.appendChild(li);
+      var a = content.document.createElement('a');
+      li.appendChild(a);
+      a.href = historyLink.href;
+      a.innerText = this.getString('viewPreviousVersions');
+    }
+
+    var installButton = content.document.querySelector('a.InstallButton-button');
+    var linkToPass = installButton ? installButton.href : content.location.href;
+    var convertLink = this.converterURL + "?url=" + encodeURIComponent(linkToPass);
+    var par2 = this.getString('convertAddon',
+      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
+    var li = content.document.createElement('li');
+    newSiteOptions.appendChild(li);
+    amoBr.addSanitizedHtmlASDom(li, par2);
+  },
+}
+
 var amoBr = {
   
   converterURL: 'http://addonconverter.fotokraina.com/',
@@ -113,15 +164,24 @@ var amoBr = {
   
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
+    if (e.target.defaultView.frameElement // ignore frames
+        || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
+        || !content.document.body
+        ) {
+      return;
+    }
+
+    /* Handle new version of AMO */
+    if (content.document.getElementById('react-view')) {
+      newAmoBr.modifyNewSite();
+      content.window.addEventListener('popstate', function () {
+        newAmoBr.modifyNewSite();
+      });
+      return;
+    }
+
     /* Delay until AMO scripts have run */
     content.setTimeout(() => {
-      if (e.target.defaultView.frameElement // ignore frames
-          || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
-          || !content.document.body
-          ) {
-        return;
-      }
-      
       //this.displayGrabbedLinks();
       this.addStyleSheet();
       var app = this.detectAppNameForPage();
@@ -155,49 +215,8 @@ var amoBr = {
         
         this.modifyCollectionListing();
         this.modifyHoverCards();
-        
-        var addonDetails = content.document.querySelector('.Addon-details');
-        if (addonDetails) {
-          this.modifyNewSite(addonDetails);
-        }
       }
     }, 0);
-  },
-  
-  
-  modifyNewSite: function (addonDetails) {
-    var newSiteMessage = content.document.createElement("div");
-    newSiteMessage.textContent = this.getString('newSiteMessage');
-    addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
-    
-    var newSiteOptions = content.document.createElement('ul');
-    newSiteMessage.appendChild(newSiteOptions);
-    
-    var li = content.document.createElement('li');
-    newSiteOptions.appendChild(li);
-    var a = content.document.createElement('a');
-    li.appendChild(a);
-    a.href = this.convertURLToSM(content.location.href);
-    a.innerText = this.getString('checkForSMVersion');
-    
-    var historyLink = content.document.querySelector('.AddonMoreInfo-version-history-link');
-    if (historyLink) {
-      var li = content.document.createElement('li');
-      newSiteOptions.appendChild(li);
-      var a = content.document.createElement('a');
-      li.appendChild(a);
-      a.href = historyLink.href;
-      a.innerText = this.getString('viewPreviousVersions');
-    }
-    
-    var installButton = content.document.querySelector('a.InstallButton-button');
-    var linkToPass = installButton ? installButton.href : content.location.href;
-    var convertLink = this.converterURL + "?url=" + encodeURIComponent(linkToPass);
-    var par2 = amoBr.getString('convertAddon',
-      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
-    var li = content.document.createElement('li');
-    newSiteOptions.appendChild(li);
-    amoBr.addSanitizedHtmlASDom(li, par2);
   },
 
   

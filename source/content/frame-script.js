@@ -197,7 +197,7 @@ var amoBr = {
       ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
     var li = content.document.createElement('li');
     newSiteOptions.appendChild(li);
-    li.innerHTML = par2;
+    amoBr.addSanitizedHtmlASDom(li, par2);
   },
 
   
@@ -693,7 +693,7 @@ var amoBr = {
     }
   },
   
-  /* Modify hover cards - mouseover popups with add-ons like those on
+  /* Modify hover cards - mouse over popups with add-ons like those on
    * AMO home page
    */
   modifyHoverCards: function() {
@@ -737,7 +737,7 @@ var amoBr = {
         div.style.fontSize = '8pt';
         div.style.textAlign = 'center';
         div.style.lineHeight = '1.4';
-        div.innerHTML = amoBr.getString('notCompatible');
+        amoBr.addSanitizedHtmlASDom(div, amoBr.getString('notCompatible'));
       
         var compat = item.querySelector('span.meta.compat');
         if (compat) {
@@ -747,8 +747,9 @@ var amoBr = {
             var maxVer = +match[1];
             if (maxVer <= 56) {
               var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
-              div.innerHTML = amoBr.getString('convertAddon',
-                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
+              div.textContent = "";
+              amoBr.addSanitizedHtmlASDom(div, amoBr.getString('convertAddon',
+                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]));
             }
           }
         }

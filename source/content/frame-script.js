@@ -36,7 +36,7 @@ var newAmoBr = {
           result.newestVersion = version;
         }
         // All versions that use WebExtensions, besides the most recent, should be ignored.
-        if (!version.files.some(f => f.is_webextension)) {
+        if (!version.files.every(f => f.is_webextension)) {
           // The most recent non-WebExtensions version. (Might be a hybrid add-on which won't work.)
           if (result.newestLegacyVersion === null) {
             result.newestLegacyVersion = version;
@@ -54,21 +54,100 @@ var newAmoBr = {
     return result;
   },
 
+  dateToString: function (dateStr) {
+    return new Date(dateStr).toLocaleDateString();
+  },
+
   createAddonInfoDiv: function () {
     const div = content.document.createElement('div');
-    div.textContent = "Loading...";
+    div.textContent = 'Loading...';
 
     this.getRelevantVersions(this.getAddonId()).then(obj => {
-      div.textContent = `
-Newest version: ${obj.newestVersion && obj.newestVersion.version}
-Newest non-WebExtensions version: ${obj.newestLegacyVersion && obj.newestLegacyVersion.version}
-Newest SeaMonkey version: ${obj.newestSeaMonkeyVersion && obj.newestSeaMonkeyVersion.version}`;
+      div.textContent = '';
+      if (obj.newestVersion) {
+        div.appendChild(this.createVersionInfoParagraph(
+          this.getString('details_newestVersion', [obj.newestVersion.version]),
+          obj.newestVersion));
+      }
+      if (obj.newestLegacyVersion && obj.newestLegacyVersion !== obj.newestVersion) {
+        div.appendChild(this.createVersionInfoParagraph(
+          this.getString('details_newestLegacyVersion', [obj.newestLegacyVersion.version, this.dateToString(obj.newestLegacyVersion.files[0].created)]),
+          obj.newestLegacyVersion));
+      }
+      if (obj.newestSeaMonkeyVersion && obj.newestSeaMonkeyVersion !== obj.newestLegacyVersion) {
+        div.appendChild(this.createVersionInfoParagraph(
+          this.getString('details_newestSeaMonkeyVersion', [obj.newestSeaMonkeyVersion.version, this.dateToString(obj.newestSeaMonkeyVersion.files[0].created)]),
+          obj.newestSeaMonkeyVersion));
+      }
     }).catch(e => {
       content.console.error(e);
       div.textContent = "Cannot load SeaMonkey compatibility information (an unknown error occurred.)";
     });
 
     return div;
+  },
+
+  createVersionInfoParagraph: function (initialText, version) {
+    const p = content.document.createElement('p');
+    p.textContent = initialText + ' ';
+
+    if (version.files.every(f => f.is_webextension)) {
+      p.textContent += this.getString('details_webExtensions');
+    } else if (!version.compatibility.seamonkey) {
+      p.textContent += this.getString('details_notSeaMonkeyCompatible');
+
+      const ul = content.document.createElement('ul');
+      p.appendChild(ul);
+      for (const file of version.files) {
+        const li = content.document.createElement('li');
+        ul.appendChild(li);
+        const a = content.document.createElement('a');
+        li.appendChild(a);
+        a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
+        a.textContent = this.getString('details_convert');
+        if (file.platform != 'all') {
+          a.textContent += ` (${file.platform})`;
+        }
+      }
+    } else {
+      p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
+
+      const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent)[1];
+      let versionOk = true;
+      if (smVersionMatch) {
+        let regex = new RegExp(`^${version.compatibility.seamonkey.max.replace('.', '\\.').replace('*', '.+')}$`);
+        versionOk = regex.test(smVersionMatch[1]);
+      }
+
+      if (!versionOk) {
+        p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
+        if (version.files.some(f => f.is_strict_compatibility_enabled)) {
+          p.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
+        } else {
+          p.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
+        }
+      }
+
+      const ul = content.document.createElement('ul');
+      p.appendChild(ul);
+      for (const file of version.files) {
+        const li = content.document.createElement('li');
+        ul.appendChild(li);
+        const a = content.document.createElement('a');
+        li.appendChild(a);
+        if (file.is_strict_compatibility_enabled) {
+          a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
+          a.textContent = this.getString('details_convert');
+        } else {
+          a.href = file.url;
+          a.textContent = this.getString('details_download');
+        }
+        if (file.platform != 'all') {
+          a.textContent += ` (${file.platform})`;
+        }
+      }
+    }
+    return p;
   },
 
   modifyNewSite: function () {

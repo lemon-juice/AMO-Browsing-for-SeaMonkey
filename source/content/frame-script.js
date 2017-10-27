@@ -19,15 +19,59 @@ var newAmoBr = {
     return null;
   },
 
-  /* Get all versions of add-on */
-  getVersions: async function (id) {
-    const resp = await content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`);
-    return await resp.json();
+  getRelevantVersions: async function (id) {
+    var result = {
+      newestVersion: null,
+      newestLegacyVersion: null,
+      newestSeaMonkeyVersion: null
+    };
+
+    let url = `https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`;
+    while (url !== null) {
+      const resp = await content.fetch(url);
+      const resp_json = await resp.json();
+      for (let version of resp_json.results) {
+        // The newest version will be the first one in the results
+        if (result.newestVersion === null) {
+          result.newestVersion = version;
+        }
+        // All versions that use WebExtensions, besides the most recent, should be ignored.
+        if (!version.files.some(f => f.is_webextension)) {
+          // The most recent non-WebExtensions version. (Might be a hybrid add-on which won't work.)
+          if (result.newestLegacyVersion === null) {
+            result.newestLegacyVersion = version;
+          }
+          // Find the most recent SeaMonkey-compatible version.
+          if (version.compatibility.seamonkey) {
+            result.newestSeaMonkeyVersion = version;
+            return result;
+          }
+        }
+      }
+      url = resp_json.next;
+    }
+
+    return result;
+  },
+
+  createAddonInfoDiv: function () {
+    const div = content.document.createElement('div');
+    div.textContent = "Loading...";
+
+    this.getRelevantVersions(this.getAddonId()).then(obj => {
+      div.textContent = `
+Newest version: ${obj.newestVersion && obj.newestVersion.version}
+Newest non-WebExtensions version: ${obj.newestLegacyVersion && obj.newestLegacyVersion.version}
+Newest SeaMonkey version: ${obj.newestSeaMonkeyVersion && obj.newestSeaMonkeyVersion.version}`;
+    }).catch(e => {
+      content.console.error(e);
+      div.textContent = "Cannot load SeaMonkey compatibility information (an unknown error occurred.)";
+    });
+
+    return div;
   },
 
   modifyNewSite: function () {
-    this.getVersions(this.getAddonId()).then(x => content.console.log(x));
-
     var addonDetails = content.document.querySelector('.Addon-details');
 
     var newSiteMessage = content.document.createElement("div");
@@ -62,6 +106,8 @@ var newAmoBr = {
     var li = content.document.createElement('li');
     newSiteOptions.appendChild(li);
     amoBr.addSanitizedHtmlASDom(li, par2);
+
+    newSiteMessage.appendChild(this.createAddonInfoDiv());
   },
 }
 

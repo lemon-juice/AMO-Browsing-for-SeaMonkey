@@ -66,7 +66,7 @@ var newAmoBr = {
       div.textContent = '';
       if (obj.newestVersion) {
         div.appendChild(this.createVersionInfoParagraph(
-          this.getString('details_newestVersion', [obj.newestVersion.version]),
+          this.getString('details_newestVersion', [obj.newestVersion.version, this.dateToString(obj.newestVersion.files[0].created)]),
           obj.newestVersion));
       }
       if (obj.newestLegacyVersion && obj.newestLegacyVersion !== obj.newestVersion) {
@@ -139,52 +139,46 @@ var newAmoBr = {
     const addlSpan = content.document.createElement('span');
     p.appendChild(addlSpan);
 
-    let show_download = false;
-    let show_convert = false;
+    let show = null;
 
     if (version.files.every(f => f.is_webextension)) {
       addlSpan.textContent += this.getString('details_webExtensions');
     } else if (!version.compatibility.seamonkey) {
       addlSpan.textContent += this.getString('details_notSeaMonkeyCompatible');
-      show_convert = true;
+      show = 'convert';
     } else if (!this.checkMinVersion(version.compatibility.seamonkey.min)) {
       addlSpan.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
     } else if (!this.checkMaxVersion(version.compatibility.seamonkey.max)) {
       addlSpan.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
-      if (version.files.some(f => f.is_strict_compatibility_enabled)) {
+      if (version.is_strict_compatibility_enabled) {
         addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
-        show_convert = true;
+        show = 'convert';
       } else {
         addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
-        show_download = true;
+        show = 'download';
       }
     } else {
-      show_download = true;
+      addlSpan.textContent += ' ' + this.getString('details_compatible', [version.compatibility.seamonkey.min]);
+      show = 'download';
     }
 
-    if (show_convert || show_download) {
+    if (show) {
       const ul = content.document.createElement('ul');
       p.appendChild(ul);
       for (const file of version.files) {
         const li = content.document.createElement('li');
         ul.appendChild(li);
-        if (show_convert) {
-          const a = content.document.createElement('a');
-          li.appendChild(a);
+        const a = content.document.createElement('a');
+        li.appendChild(a);
+        if (show == 'convert') {
           a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
           a.textContent = this.getString('details_convert');
-          if (file.platform != 'all') {
-            a.textContent += ` (${file.platform})`;
-          }
-        }
-        if (show_download) {
-          const a = content.document.createElement('a');
-          li.appendChild(a);
+        } else if (show == 'download') {
           a.href = file.url;
           a.textContent = this.getString('details_download');
-          if (file.platform != 'all') {
-            a.textContent += ` (${file.platform})`;
-          }
+        }
+        if (file.platform != 'all') {
+          a.textContent += ` (${file.platform})`;
         }
       }
     }

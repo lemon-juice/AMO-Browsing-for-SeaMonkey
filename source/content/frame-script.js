@@ -55,7 +55,7 @@ var newAmoBr = {
   },
 
   dateToString: function (dateStr) {
-    return new Date(dateStr).toLocaleDateString();
+    return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
   },
 
   createAddonInfoDiv: function () {

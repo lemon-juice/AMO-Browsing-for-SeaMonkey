@@ -133,25 +133,29 @@ var newAmoBr = {
 
   createVersionInfoParagraph: function (initialText, version) {
     const p = content.document.createElement('p');
-    p.textContent = initialText + ' ';
+    p.textContent = initialText;
+    p.appendChild(content.document.createElement('br'));
+
+    const addlSpan = content.document.createElement('span');
+    p.appendChild(addlSpan);
 
     let show_download = false;
     let show_convert = false;
 
     if (version.files.every(f => f.is_webextension)) {
-      p.textContent += this.getString('details_webExtensions');
+      addlSpan.textContent += this.getString('details_webExtensions');
     } else if (!version.compatibility.seamonkey) {
-      p.textContent += this.getString('details_notSeaMonkeyCompatible');
+      addlSpan.textContent += this.getString('details_notSeaMonkeyCompatible');
       show_convert = true;
     } else if (!this.checkMinVersion(version.compatibility.seamonkey.min)) {
-      p.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
+      addlSpan.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
     } else if (!this.checkMaxVersion(version.compatibility.seamonkey.max)) {
-      p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
+      addlSpan.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
       if (version.files.some(f => f.is_strict_compatibility_enabled)) {
-        p.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
+        addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
         show_convert = true;
       } else {
-        p.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
+        addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
         show_download = true;
       }
     } else {
@@ -191,39 +195,12 @@ var newAmoBr = {
     var addonDetails = content.document.querySelector('.Addon-details');
 
     var newSiteMessage = content.document.createElement("div");
-    newSiteMessage.textContent = this.getString('newSiteMessage');
     addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
 
-    var newSiteOptions = content.document.createElement('ul');
-    newSiteMessage.appendChild(newSiteOptions);
-
-    var li = content.document.createElement('li');
-    newSiteOptions.appendChild(li);
-    var a = content.document.createElement('a');
-    li.appendChild(a);
-    a.href = amoBr.convertURLToSM(content.location.href);
-    a.innerText = this.getString('checkForSMVersion');
-
-    var historyLink = content.document.querySelector('.AddonMoreInfo-version-history-link');
-    if (historyLink) {
-      var li = content.document.createElement('li');
-      newSiteOptions.appendChild(li);
-      var a = content.document.createElement('a');
-      li.appendChild(a);
-      a.href = historyLink.href;
-      a.innerText = this.getString('viewPreviousVersions');
-    }
-
-    var installButton = content.document.querySelector('a.InstallButton-button');
-    var linkToPass = installButton ? installButton.href : content.location.href;
-    var convertLink = this.converterURL + "?url=" + encodeURIComponent(linkToPass);
-    var par2 = this.getString('convertAddon',
-      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
-    var li = content.document.createElement('li');
-    newSiteOptions.appendChild(li);
-    amoBr.addSanitizedHtmlASDom(li, par2);
-
     newSiteMessage.appendChild(this.createAddonInfoDiv());
+
+    const installButton = content.document.querySelector('div.InstallButton');
+    installButton.style.display = 'none';
   },
 }
 

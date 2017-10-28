@@ -1,5 +1,7 @@
 "use strict";
-  
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var newAmoBr = {
@@ -19,40 +21,49 @@ var newAmoBr = {
     return null;
   },
 
-  getRelevantVersions: async function (id) {
-    var result = {
-      newestVersion: null,
-      newestLegacyVersion: null,
-      newestSeaMonkeyVersion: null
-    };
+  /* Return a promise that resolves to an object with 1-3 relevant (current or
+     past) versions of an add-on. This could be an async function if we only
+     wanted to support SeaMonkey 2.49+. */
+  getRelevantVersions: (() => {
+    var _ref = _asyncToGenerator(function* (id) {
+      var result = {
+        newestVersion: null,
+        newestLegacyVersion: null,
+        newestSeaMonkeyVersion: null
+      };
 
-    let url = `https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`;
-    while (url !== null) {
-      const resp = await content.fetch(url);
-      const resp_json = await resp.json();
-      for (let version of resp_json.results) {
-        // The newest version will be the first one in the results
-        if (result.newestVersion === null) {
-          result.newestVersion = version;
-        }
-        // All versions that use WebExtensions, besides the most recent, should be ignored.
-        if (!version.files.every(f => f.is_webextension)) {
-          // The most recent non-WebExtensions version. (Might be a hybrid add-on which won't work.)
-          if (result.newestLegacyVersion === null) {
-            result.newestLegacyVersion = version;
+      let url = `https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`;
+      while (url !== null) {
+        const resp = yield content.fetch(url);
+        const resp_json = yield resp.json();
+        for (let version of resp_json.results) {
+          // The newest version will be the first one in the results
+          if (result.newestVersion === null) {
+            result.newestVersion = version;
           }
-          // Find the most recent SeaMonkey-compatible version.
-          if (version.compatibility.seamonkey) {
-            result.newestSeaMonkeyVersion = version;
-            return result;
+          // All versions that use WebExtensions, besides the most recent, should be ignored.
+          if (!version.files.every(f => f.is_webextension)) {
+            // The most recent non-WebExtensions version. (Might be a hybrid add-on which won't work.)
+            if (result.newestLegacyVersion === null) {
+              result.newestLegacyVersion = version;
+            }
+            // Find the most recent SeaMonkey-compatible version.
+            if (version.compatibility.seamonkey) {
+              result.newestSeaMonkeyVersion = version;
+              return result;
+            }
           }
         }
+        url = resp_json.next;
       }
-      url = resp_json.next;
-    }
 
-    return result;
-  },
+      return result;
+    });
+
+    return function getRelevantVersions(_x) {
+      return _ref.apply(this, arguments);
+    };
+  })(),
 
   dateToString: function (dateStr) {
     return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
@@ -61,7 +72,7 @@ var newAmoBr = {
   createAddonInfoDiv: function () {
     const div = content.document.createElement('div');
     div.textContent = 'Loading...';
-    
+
     this.getRelevantVersions(this.getAddonId()).then(obj => {
       div.textContent = '';
       if (obj.newestVersion) {
@@ -116,7 +127,7 @@ var newAmoBr = {
     const myVersion = smVersionMatch
       ? smVersionMatch[1].split('.')
       : [Infinity];
-    
+
     for (let i = 0; i < addonMaxVersion.length; i++) {
       const theirMax = addonMaxVersion[i] == '*'
         ? Infinity
@@ -159,7 +170,7 @@ var newAmoBr = {
     if (show) {
       const ul = content.document.createElement('ul');
       p.appendChild(ul);
-      for (const file of version.files) {
+      for (let file of version.files) {
         const li = content.document.createElement('li');
         ul.appendChild(li);
         const a = content.document.createElement('a');

@@ -61,7 +61,7 @@ var newAmoBr = {
   createAddonInfoDiv: function () {
     const div = content.document.createElement('div');
     div.textContent = 'Loading...';
-
+    
     this.getRelevantVersions(this.getAddonId()).then(obj => {
       div.textContent = '';
       if (obj.newestVersion) {
@@ -150,13 +150,7 @@ var newAmoBr = {
       addlSpan.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
     } else if (!this.checkMaxVersion(version.compatibility.seamonkey.max)) {
       addlSpan.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
-      if (version.is_strict_compatibility_enabled) {
-        addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
-        show = 'convert';
-      } else {
-        addlSpan.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
-        show = 'download';
-      }
+      show = 'download';
     } else {
       addlSpan.textContent += ' ' + this.getString('details_compatible', [version.compatibility.seamonkey.min]);
       show = 'download';

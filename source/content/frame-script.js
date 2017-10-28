@@ -87,63 +87,100 @@ var newAmoBr = {
     return div;
   },
 
+  checkMinVersion: function (min) {
+    const addonMinVersion = min.split('.');
+
+    const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent);
+    const myVersion = smVersionMatch
+      ? smVersionMatch[1].split('.')
+      : [Infinity];
+
+    for (let i = 0; i < addonMinVersion.length; i++) {
+      const theirMin = addonMinVersion[i] == '*'
+        ? 0
+        : +addonMinVersion[i];
+      const mine = myVersion.length > i
+        ? myVersion[i]
+        : 0;
+      if (theirMin > mine) {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  checkMaxVersion: function (max) {
+    const addonMaxVersion = max.split('.');
+
+    const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent);
+    const myVersion = smVersionMatch
+      ? smVersionMatch[1].split('.')
+      : [Infinity];
+    
+    for (let i = 0; i < addonMaxVersion.length; i++) {
+      const theirMax = addonMaxVersion[i] == '*'
+        ? Infinity
+        : +addonMaxVersion[i];
+      const mine = myVersion.length > i
+        ? myVersion[i]
+        : 0;
+      if (theirMax < mine) {
+        return false;
+      }
+    }
+    return true;
+  },
+
   createVersionInfoParagraph: function (initialText, version) {
     const p = content.document.createElement('p');
     p.textContent = initialText + ' ';
+
+    let show_download = false;
+    let show_convert = false;
 
     if (version.files.every(f => f.is_webextension)) {
       p.textContent += this.getString('details_webExtensions');
     } else if (!version.compatibility.seamonkey) {
       p.textContent += this.getString('details_notSeaMonkeyCompatible');
-
-      const ul = content.document.createElement('ul');
-      p.appendChild(ul);
-      for (const file of version.files) {
-        const li = content.document.createElement('li');
-        ul.appendChild(li);
-        const a = content.document.createElement('a');
-        li.appendChild(a);
-        a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
-        a.textContent = this.getString('details_convert');
-        if (file.platform != 'all') {
-          a.textContent += ` (${file.platform})`;
-        }
+      show_convert = true;
+    } else if (!this.checkMinVersion(version.compatibility.seamonkey.min)) {
+      p.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
+    } else if (!this.checkMaxVersion(version.compatibility.seamonkey.max)) {
+      p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
+      if (version.files.some(f => f.is_strict_compatibility_enabled)) {
+        p.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
+        show_convert = true;
+      } else {
+        p.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
+        show_download = true;
       }
     } else {
-      p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
+      show_download = true;
+    }
 
-      const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent)[1];
-      let versionOk = true;
-      if (smVersionMatch) {
-        let regex = new RegExp(`^${version.compatibility.seamonkey.max.replace('.', '\\.').replace('*', '.+')}$`);
-        versionOk = regex.test(smVersionMatch[1]);
-      }
-
-      if (!versionOk) {
-        p.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
-        if (version.files.some(f => f.is_strict_compatibility_enabled)) {
-          p.textContent += ' ' + this.getString('details_maxSupportedVer_needsConversion');
-        } else {
-          p.textContent += ' ' + this.getString('details_maxSupportedVer_workFine');
-        }
-      }
-
+    if (show_convert || show_download) {
       const ul = content.document.createElement('ul');
       p.appendChild(ul);
       for (const file of version.files) {
         const li = content.document.createElement('li');
         ul.appendChild(li);
-        const a = content.document.createElement('a');
-        li.appendChild(a);
-        if (file.is_strict_compatibility_enabled) {
+        if (show_convert) {
+          const a = content.document.createElement('a');
+          li.appendChild(a);
           a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
           a.textContent = this.getString('details_convert');
-        } else {
+          if (file.platform != 'all') {
+            a.textContent += ` (${file.platform})`;
+          }
+        }
+        if (show_download) {
+          const a = content.document.createElement('a');
+          li.appendChild(a);
           a.href = file.url;
           a.textContent = this.getString('details_download');
-        }
-        if (file.platform != 'all') {
-          a.textContent += ` (${file.platform})`;
+          if (file.platform != 'all') {
+            a.textContent += ` (${file.platform})`;
+          }
         }
       }
     }

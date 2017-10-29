@@ -765,7 +765,14 @@ var amoBr = {
           if (match) {
             var maxVer = +match[1];
             if (maxVer <= 56) {
-              var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
+              var xpiURL = buttons[i].href;
+
+              var downloadAnywayLink = item.querySelector('.download-anyway a');
+              if (downloadAnywayLink) {
+                xpiURL = downloadAnywayLink.href;
+              }
+
+              var convertLink = this.converterURL + "?url=" + encodeURIComponent(xpiURL);
               div.textContent = "";
               amoBr.addSanitizedHtmlASDom(div, amoBr.getString('convertAddon',
                 ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]));

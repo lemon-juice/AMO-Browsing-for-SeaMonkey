@@ -28,6 +28,12 @@ div.amobrowsing-info p {
   margin: 0.5em 0;
 }
 
+div.amobrowsing-info ul {
+  margin-left: 1em;
+  list-style: disc;
+  font-weight: bold;
+}
+
 a.amobrowsing-amber {
   background: #b89b0e linear-gradient(#cec026, #a68d00) repeat scroll 0 0 !important;
 }
@@ -75,5 +81,5 @@ section.primary.island.more-island .button.not-available {
 
 /* WebExtensions not compatible with SeaMonkey yet */
 div a.is-webextension {
-    background-color: #930;
+    background-color: darkgoldenrod;
 }

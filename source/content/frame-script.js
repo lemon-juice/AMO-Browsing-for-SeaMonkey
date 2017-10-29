@@ -25,7 +25,9 @@ var newAmoBr = {
      past) versions of an add-on. This could be an async function if we only
      wanted to support SeaMonkey 2.49+. */
   getRelevantVersions: (() => {
+    // Async function implemented with generators via babel.
     var _ref = _asyncToGenerator(function* (id) {
+      // Real function starts here
       var result = {
         newestVersion: null,
         newestLegacyVersion: null,
@@ -69,11 +71,11 @@ var newAmoBr = {
     return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
   },
 
-  createAddonInfoDiv: function () {
+  createAddonInfoDiv: function (id) {
     const div = content.document.createElement('div');
     div.textContent = 'Loading...';
 
-    this.getRelevantVersions(this.getAddonId()).then(obj => {
+    this.getRelevantVersions(id).then(obj => {
       div.textContent = '';
       if (obj.newestVersion) {
         div.appendChild(this.createVersionInfoParagraph(
@@ -143,7 +145,10 @@ var newAmoBr = {
   },
 
   createVersionInfoParagraph: function (initialText, version) {
-    const p = content.document.createElement('p');
+    const div = content.document.createElement('div');
+
+    let p = content.document.createElement('p');
+    div.appendChild(p);
     p.textContent = initialText;
     p.appendChild(content.document.createElement('br'));
 
@@ -187,7 +192,7 @@ var newAmoBr = {
         }
       }
     }
-    return p;
+    return div;
   },
 
   modifyNewSite: function () {
@@ -196,7 +201,7 @@ var newAmoBr = {
     var newSiteMessage = content.document.createElement("div");
     addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
 
-    newSiteMessage.appendChild(this.createAddonInfoDiv());
+    newSiteMessage.appendChild(this.createAddonInfoDiv(id));
 
     const installButton = content.document.querySelector('div.InstallButton');
     installButton.style.display = 'none';
@@ -523,16 +528,6 @@ var amoBr = {
       hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.CTA');
     }
     
-    // new version of AMO
-    if (hugeButtons.length == 0) {
-      var addonDetails = document.querySelector(".Addon-details");
-      if (addonDetails) {
-        var newButton = document.createElement("button");
-        addonDetails.parentElement.insertBefore(newButton, addonDetails);
-        hugeButtons = [newButton];
-      }
-    }
-    
     if (hugeButtons.length > 0) {
       var addOnData = this.getAddonData();
       var prevHref;
@@ -555,16 +550,7 @@ var amoBr = {
         prevHref = hugeButton.href;
         var downloadAnywayButton = content.document.getElementById('downloadAnyway');
         
-        if (this.workingFxAddOns.indexOf(addOnData.addonId) >= 0 && downloadAnywayButton) {
-          this.FxPageAddOnIsCompatible(hugeButton, downloadAnywayButton);
-          
-        } else {
-          if (content.document.querySelector('#addon .is-webextension') == null) {
-            this.FxPageCheckForSMVersion(hugeButton);
-          } else {
-            this.FxPageWebExtensionsMessage(hugeButton);
-          }
-        }
+        this.FxPageCheckForSMVersion(hugeButton);
       }
     }
     
@@ -587,83 +573,18 @@ var amoBr = {
   
   /* On Fx page - replace huge button with info to check for SM version */
   FxPageCheckForSMVersion: function(hugeButton) {
-    hugeButton.classList.remove('concealed');
-    hugeButton.classList.remove('CTA');
-    hugeButton.style.display = 'inline-block';
-    hugeButton.textContent = amoBr.getString('checkForSMVersion');
-    hugeButton.href = this.convertURLToSM(content.location.href);
-    
-    var convertLink = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
-    
-    var infoElem = content.document.createElement('div');
-    infoElem.className = 'amobrowsing-info';
-    
-    if (this.isContribPage()) {
-      infoElem.style.marginTop = '0.5em';
-      infoElem.style.maxWidth = '400px';
-    }
-    
-    var par1 = amoBr.getString('checkForSMVersion_info',
-      ["<a href='" + this.converterURL + "'>", "</a>"]);
-    
-    var par2 = amoBr.getString('convertAddon',
-      ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
-    
-    var p1 = content.document.createElement('p');
-    amoBr.addSanitizedHtmlASDom(p1, par1);
-    
-    var p2 = content.document.createElement('p');
-    amoBr.addSanitizedHtmlASDom(p2, par2);
-    
-    infoElem.appendChild(p1);
-    infoElem.appendChild(p2);
-    
-    hugeButton.parentNode.appendChild(infoElem);
-  },
-  
-  /* On Fx page - let user know that WebExtensions are not supported */
-  FxPageWebExtensionsMessage: function(hugeButton) {
-    var versionsLink = content.document.location.pathname.replace('/firefox/', '/seamonkey/') + 'versions/';
-    
-    var infoElem = content.document.createElement('div');
-    infoElem.className = 'amobrowsing-info';
-    
-    if (this.isContribPage()) {
-      infoElem.style.marginTop = '0.5em';
-      infoElem.style.maxWidth = '400px';
-    }
-    
-    var par1 = amoBr.getString('webExtensions_info',
-      ["<a href='" + versionsLink + "'>", "</a>"]);
-    
-    var p1 = content.document.createElement('p');
-    amoBr.addSanitizedHtmlASDom(p1, par1);
-    
-    infoElem.appendChild(p1);
-    
-    hugeButton.parentNode.appendChild(infoElem);
     hugeButton.style.display = 'none';
-  },
-  
-   
-  /* On Fx page - replace huge button with info that this add-on works in SM */
-  FxPageAddOnIsCompatible: function(hugeButton, downloadAnywayButton) {
-    hugeButton.classList.remove('concealed');
-    hugeButton.classList.remove('CTA');
-    hugeButton.style.display = 'inline-block';
-    hugeButton.textContent = "+ " + amoBr.getString('addTOSM');
-    hugeButton.href = downloadAnywayButton.href;
     
     var infoElem = content.document.createElement('div');
-    infoElem.className = 'amobrowsing-sm-compat-info compatible';
+    infoElem.className = 'amobrowsing-info';
     
     if (this.isContribPage()) {
       infoElem.style.marginTop = '0.5em';
       infoElem.style.maxWidth = '400px';
     }
-    
-    var p = content.document.createElement('p');
-    amoBr.addSanitizedHtmlASDom(infoElem, amoBr.getString('FxAddOnIsCompatible'));
+
+    const id = +content.document.querySelector('.install').getAttribute('data-addon');
+    infoElem.appendChild(newAmoBr.createAddonInfoDiv(id));
     
     hugeButton.parentNode.appendChild(infoElem);
   },

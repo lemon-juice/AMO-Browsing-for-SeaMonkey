@@ -67,10 +67,46 @@ var newAmoBr = {
     };
   })(),
 
+  /* Return a promise that resolves to a list of possible
+     legacy alternatives for a WebExtension add-on. This could be an async
+     function if we only wanted to support SeaMonkey 2.49+. */
+  getReplacementGuids: (() => {
+    // Async function implemented with generators via babel.
+    var _ref = _asyncToGenerator(function* (id) {
+      // Real function starts here
+      const addon_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${id}`);
+      const addon = yield addon_resp.json();
+      const guid = addon.guid;
+
+      const list = [];
+      
+      for (let page = 1; page <= 10; page++) {
+        const replacements_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/replacement-addon/?page=${page}`);
+        const replacements_json = yield replacements_resp.json();
+        for (let o of replacements_json.results) {
+          if (o.replacement.indexOf(guid) >= 0) {
+            const other_addon_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${o.guid}`);
+            const other_addon = yield other_addon_resp.json();
+            list.push(other_addon);
+          }
+        }
+        if (replacements_json.next == null) break;
+      }
+
+      return list;
+    });
+
+    return function getReplacementGuids(_x) {
+      return _ref.apply(this, arguments);
+    };
+  })(),
+
   dateToString: function (dateStr) {
     return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
   },
 
+  /* In SeaMonkey 2.49, this could also be an async function (it would reduce
+     some of the nesting.) */
   createAddonInfoDiv: function (id) {
     const div = content.document.createElement('div');
     div.textContent = 'Loading...';
@@ -95,9 +131,35 @@ var newAmoBr = {
           this.getString('details_newestSeaMonkeyVersion', [obj.newestSeaMonkeyVersion.version, this.dateToString(obj.newestSeaMonkeyVersion.files[0].created)]),
           obj.newestSeaMonkeyVersion));
       }
+      if (!obj.newestSeaMonkeyVersion && !obj.newestLegacyVersion) {
+        const p = content.document.createElement('p');
+        p.textContent = this.getString('details_replacementsLoading');
+        div.appendChild(p);
+
+        this.getReplacementGuids(id).then(replacements => {
+          if (replacements.length == 0) {
+            p.textContent = "";
+            return;
+          }
+          p.textContent = this.getString('details_replacements');
+          const ul = content.document.createElement('ul');
+          div.appendChild(ul);
+          for (let r of replacements) {
+            const li = content.document.createElement('li');
+            ul.appendChild(li);
+            const a = content.document.createElement('a');
+            a.textContent = r.name[r.default_locale];
+            a.href = r.url;
+            li.appendChild(a);
+          }
+        }).catch(e => {
+          content.console.error(e);
+          p.textContent = this.getString('details_error');
+        });
+      }
     }).catch(e => {
       content.console.error(e);
-      div.textContent = "Cannot load SeaMonkey compatibility information (an unknown error occurred.)";
+      div.textContent = this.getString('details_error');
     });
 
     return div;

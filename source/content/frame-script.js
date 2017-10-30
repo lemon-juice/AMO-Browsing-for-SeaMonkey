@@ -320,7 +320,7 @@ var amoBr = {
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
     if (e.target.defaultView.frameElement // ignore frames
-        || e.target.defaultView.location.href.indexOf('https://addons.mozilla.org/') != 0
+        || !['https://addons.mozilla.org/', 'https://addons-dev.allizom.org/'].some(s => e.target.defaultView.location.href.indexOf(s) == 0)
         || !content.document.body
         ) {
       return;
@@ -836,7 +836,14 @@ var amoBr = {
           if (match) {
             var maxVer = +match[1];
             if (maxVer <= 56) {
-              var convertLink = this.converterURL + "?url=" + encodeURIComponent(buttons[i].href);
+              var xpiURL = buttons[i].href;
+
+              var downloadAnywayLink = item.querySelector('.download-anyway a');
+              if (downloadAnywayLink) {
+                xpiURL = downloadAnywayLink.href;
+              }
+
+              var convertLink = this.converterURL + "?url=" + encodeURIComponent(xpiURL);
               div.textContent = "";
               amoBr.addSanitizedHtmlASDom(div, amoBr.getString('convertAddon',
                 ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]));

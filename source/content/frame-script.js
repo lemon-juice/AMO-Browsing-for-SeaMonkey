@@ -78,16 +78,19 @@ var newAmoBr = {
     this.getRelevantVersions(id).then(obj => {
       div.textContent = '';
       if (obj.newestVersion) {
+        // Show info about the newest version, even if it's WebExtensions.
         div.appendChild(this.createVersionInfoParagraph(
           this.getString('details_newestVersion', [obj.newestVersion.version, this.dateToString(obj.newestVersion.files[0].created)]),
           obj.newestVersion));
       }
-      if (obj.newestLegacyVersion && obj.newestLegacyVersion !== obj.newestVersion) {
+      if (!obj.newestSeaMonkeyVersion && obj.newestLegacyVersion && obj.newestLegacyVersion !== obj.newestVersion) {
+        // Show info about the last legacy version, unless there's an older version that's compatible with SeaMonkey.
         div.appendChild(this.createVersionInfoParagraph(
           this.getString('details_newestLegacyVersion', [obj.newestLegacyVersion.version, this.dateToString(obj.newestLegacyVersion.files[0].created)]),
           obj.newestLegacyVersion));
       }
       if (obj.newestSeaMonkeyVersion && obj.newestSeaMonkeyVersion !== obj.newestLegacyVersion) {
+        // Show info about the last SeaMonkey version.
         div.appendChild(this.createVersionInfoParagraph(
           this.getString('details_newestSeaMonkeyVersion', [obj.newestSeaMonkeyVersion.version, this.dateToString(obj.newestSeaMonkeyVersion.files[0].created)]),
           obj.newestSeaMonkeyVersion));

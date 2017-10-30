@@ -201,7 +201,7 @@ var newAmoBr = {
     var newSiteMessage = content.document.createElement("div");
     addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
 
-    newSiteMessage.appendChild(this.createAddonInfoDiv(id));
+    newSiteMessage.appendChild(this.createAddonInfoDiv(this.getAddonId()));
 
     const installButton = content.document.querySelector('div.InstallButton');
     installButton.style.display = 'none';

@@ -34,7 +34,7 @@ var newAmoBr = {
         oldLegacyVersionsExist: false
       };
 
-      let url = `https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`;
+      let url = `/api/v3/addons/addon/${id}/versions`;
       while (url !== null) {
         const resp = yield content.fetch(url);
         const resp_json = yield resp.json();
@@ -70,18 +70,18 @@ var newAmoBr = {
     // Async function implemented with generators via babel.
     var _ref = _asyncToGenerator(function* (id) {
       // Real function starts here
-      const addon_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${id}`);
+      const addon_resp = yield content.fetch(`/api/v3/addons/addon/${id}`);
       const addon = yield addon_resp.json();
       const guid = addon.guid;
 
       const list = [];
       
       for (let page = 1; page <= 10; page++) {
-        const replacements_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/replacement-addon/?page=${page}`);
+        const replacements_resp = yield content.fetch(`/api/v3/addons/replacement-addon/?page=${page}`);
         const replacements_json = yield replacements_resp.json();
         for (let o of replacements_json.results) {
           if (o.replacement.indexOf(guid) >= 0) {
-            const other_addon_resp = yield content.fetch(`https://addons.mozilla.org/api/v3/addons/addon/${o.guid}`);
+            const other_addon_resp = yield content.fetch(`/api/v3/addons/addon/${o.guid}`);
             const other_addon = yield other_addon_resp.json();
             list.push(other_addon);
           }

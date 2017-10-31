@@ -101,6 +101,15 @@ var newAmoBr = {
     return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
   },
 
+  appendLinkToList: function (ul, href, textContent) {
+    const li = content.document.createElement('li');
+    ul.appendChild(li);
+    const a = content.document.createElement('a');
+    li.appendChild(a);
+    a.href = href;
+    a.textContent = textContent;
+  },
+
   /* In SeaMonkey 2.49, this could also be an async function (it would reduce
      some of the nesting.) */
   createAddonInfoDiv: function (id) {
@@ -129,20 +138,18 @@ var newAmoBr = {
         const ul = content.document.createElement('ul');
         p.appendChild(ul);
         for (let file of v.files) {
-          const li = content.document.createElement('li');
-          ul.appendChild(li);
-          const a = content.document.createElement('a');
-          li.appendChild(a);
+          let href, text;
           if (v.compatibility.seamonkey) {
-            a.href = file.url;
-            a.textContent = this.getString('details_download');
+            href = file.url;
+            text = this.getString('details_download');
           } else {
-            a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
-            a.textContent = this.getString('details_convert');
+            href = this.converterURL + "?url=" + encodeURIComponent(file.url);
+            text = this.getString('details_convert');
           }
           if (file.platform != 'all') {
-            a.textContent += ` (${file.platform})`;
+            text += ` (${file.platform})`;
           }
+          this.appendLinkToList(ul, href, text);
         }
       } else if (obj.oldLegacyVersionsExist) {
         // The current version uses WebExtensions, but some older versions don't.
@@ -153,12 +160,10 @@ var newAmoBr = {
 
         const ul = content.document.createElement('ul');
         div.appendChild(ul);
-        const li = content.document.createElement('li');
-        ul.appendChild(li);
-        const a = content.document.createElement('a');
-        li.appendChild(a);
-        a.href = content.location.pathname + 'versions';
-        a.textContent = this.getString('details_seeAllVersions');
+        this.appendLinkToList(
+          ul,
+          content.location.pathname + 'versions',
+          this.getString('details_seeAllVersions'));
       } else {
         // There are no legacy versions of this extension.
         const p1 = content.document.createElement('p');
@@ -179,12 +184,10 @@ var newAmoBr = {
             const ul = content.document.createElement('ul');
             div.appendChild(ul);
             for (let r of replacements) {
-              const li = content.document.createElement('li');
-              ul.appendChild(li);
-              const a = content.document.createElement('a');
-              a.textContent = r.name[r.default_locale];
-              a.href = r.url;
-              li.appendChild(a);
+              this.appendLinkToList(
+                ul,
+                r.url,
+                r.name[r.default_locale]);
             }
           }
         }).catch(e => {

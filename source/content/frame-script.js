@@ -189,7 +189,7 @@ var newAmoBr = {
           }
         }).catch(e => {
           content.console.error(e);
-          p.textContent = this.getString('details_error');
+          p2.textContent = this.getString('details_error');
         });
       }
     }).catch(e => {

@@ -30,8 +30,8 @@ var newAmoBr = {
       // Real function starts here
       var result = {
         newestVersion: null,
-        newestLegacyVersion: null,
-        newestSeaMonkeyVersion: null
+        newestSeaMonkeyVersion: null,
+        oldLegacyVersionsExist: false
       };
 
       let url = `https://addons.mozilla.org/api/v3/addons/addon/${id}/versions`;
@@ -39,16 +39,12 @@ var newAmoBr = {
         const resp = yield content.fetch(url);
         const resp_json = yield resp.json();
         for (let version of resp_json.results) {
-          // The newest version will be the first one in the results
-          if (result.newestVersion === null) {
+          if (result.newestVersion == null) {
             result.newestVersion = version;
           }
-          // All versions that use WebExtensions, besides the most recent, should be ignored.
+          // All other versions that use WebExtensions should be ignored.
           if (!version.files.every(f => f.is_webextension)) {
-            // The most recent non-WebExtensions version. (Might be a hybrid add-on which won't work.)
-            if (result.newestLegacyVersion === null) {
-              result.newestLegacyVersion = version;
-            }
+            result.oldLegacyVersionsExist = true;
             // Find the most recent SeaMonkey-compatible version.
             if (version.compatibility.seamonkey) {
               result.newestSeaMonkeyVersion = version;
@@ -113,44 +109,83 @@ var newAmoBr = {
 
     this.getRelevantVersions(id).then(obj => {
       div.textContent = '';
-      if (obj.newestVersion) {
-        // Show info about the newest version, even if it's WebExtensions.
-        div.appendChild(this.createVersionInfoParagraph(
-          this.getString('details_newestVersion', [obj.newestVersion.version, this.dateToString(obj.newestVersion.files[0].created)]),
-          obj.newestVersion));
-      }
-      if (!obj.newestSeaMonkeyVersion && obj.newestLegacyVersion && obj.newestLegacyVersion !== obj.newestVersion) {
-        // Show info about the last legacy version, unless there's an older version that's compatible with SeaMonkey.
-        div.appendChild(this.createVersionInfoParagraph(
-          this.getString('details_newestLegacyVersion', [obj.newestLegacyVersion.version, this.dateToString(obj.newestLegacyVersion.files[0].created)]),
-          obj.newestLegacyVersion));
-      }
-      if (obj.newestSeaMonkeyVersion && obj.newestSeaMonkeyVersion !== obj.newestLegacyVersion) {
-        // Show info about the last SeaMonkey version.
-        div.appendChild(this.createVersionInfoParagraph(
-          this.getString('details_newestSeaMonkeyVersion', [obj.newestSeaMonkeyVersion.version, this.dateToString(obj.newestSeaMonkeyVersion.files[0].created)]),
-          obj.newestSeaMonkeyVersion));
-      }
-      if (!obj.newestSeaMonkeyVersion && !obj.newestLegacyVersion) {
-        const p = content.document.createElement('p');
-        p.textContent = this.getString('details_replacementsLoading');
+      // Show the most recent SeaMonkey version, or the most recent version overall if none for SeaMonkey.
+      const v = obj.newestSeaMonkeyVersion || obj.newestVersion;
+      if (!v.files.every(f => f.is_webextension)) {
+        // This is a legacy extension.
+        let p = content.document.createElement('p');
         div.appendChild(p);
+        p.textContent = this.getString(
+          v.compatibility.seamonkey
+            ? 'details_newestSeaMonkeyVersion'
+            : 'details_newestVersion',
+          [v.version, this.dateToString(v.files[0].created)]);
+
+        p.appendChild(content.document.createElement('br'));
+
+        const addlSpan = content.document.createElement('span');
+        p.appendChild(addlSpan);
+
+        const ul = content.document.createElement('ul');
+        p.appendChild(ul);
+        for (let file of v.files) {
+          const li = content.document.createElement('li');
+          ul.appendChild(li);
+          const a = content.document.createElement('a');
+          li.appendChild(a);
+          if (v.compatibility.seamonkey) {
+            a.href = file.url;
+            a.textContent = this.getString('details_download');
+          } else {
+            a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
+            a.textContent = this.getString('details_convert');
+          }
+          if (file.platform != 'all') {
+            a.textContent += ` (${file.platform})`;
+          }
+        }
+      } else if (obj.oldLegacyVersionsExist) {
+        // The current version uses WebExtensions, but some older versions don't.
+        const p = content.document.createElement('p');
+        p.textContent = this.getString('details_webExtensions');
+        p.textContent += ' ' + this.getString('details_legacyVersionsExist');
+        div.appendChild(p);
+
+        const ul = content.document.createElement('ul');
+        div.appendChild(ul);
+        const li = content.document.createElement('li');
+        ul.appendChild(li);
+        const a = content.document.createElement('a');
+        li.appendChild(a);
+        a.href = content.location.pathname + 'versions';
+        a.textContent = this.getString('details_seeAllVersions');
+      } else {
+        // There are no legacy versions of this extension.
+        const p1 = content.document.createElement('p');
+        p1.textContent = this.getString('details_webExtensions');
+        div.appendChild(p1);
+
+        // Get possible replacements.
+        const p2 = content.document.createElement('p');
+        p2.textContent = this.getString('details_replacementsLoading');
+        div.appendChild(p2);
 
         this.getReplacementGuids(id).then(replacements => {
           if (replacements.length == 0) {
-            p.textContent = "";
-            return;
-          }
-          p.textContent = this.getString('details_replacements');
-          const ul = content.document.createElement('ul');
-          div.appendChild(ul);
-          for (let r of replacements) {
-            const li = content.document.createElement('li');
-            ul.appendChild(li);
-            const a = content.document.createElement('a');
-            a.textContent = r.name[r.default_locale];
-            a.href = r.url;
-            li.appendChild(a);
+            p2.textContent = '';
+          } else {
+            p2.textContent = this.getString('details_replacements');
+
+            const ul = content.document.createElement('ul');
+            div.appendChild(ul);
+            for (let r of replacements) {
+              const li = content.document.createElement('li');
+              ul.appendChild(li);
+              const a = content.document.createElement('a');
+              a.textContent = r.name[r.default_locale];
+              a.href = r.url;
+              li.appendChild(a);
+            }
           }
         }).catch(e => {
           content.console.error(e);
@@ -207,57 +242,6 @@ var newAmoBr = {
       }
     }
     return true;
-  },
-
-  createVersionInfoParagraph: function (initialText, version) {
-    const div = content.document.createElement('div');
-
-    let p = content.document.createElement('p');
-    div.appendChild(p);
-    p.textContent = initialText;
-    p.appendChild(content.document.createElement('br'));
-
-    const addlSpan = content.document.createElement('span');
-    p.appendChild(addlSpan);
-
-    let show = null;
-
-    if (version.files.every(f => f.is_webextension)) {
-      addlSpan.textContent += this.getString('details_webExtensions');
-    } else if (!version.compatibility.seamonkey) {
-      addlSpan.textContent += this.getString('details_notSeaMonkeyCompatible');
-      show = 'convert';
-    } else if (!this.checkMinVersion(version.compatibility.seamonkey.min)) {
-      addlSpan.textContent += this.getString('details_minSupportedVer', [version.compatibility.seamonkey.min]);
-    } else if (!this.checkMaxVersion(version.compatibility.seamonkey.max)) {
-      addlSpan.textContent += this.getString('details_maxSupportedVer', [version.compatibility.seamonkey.max]);
-      show = 'download';
-    } else {
-      addlSpan.textContent += ' ' + this.getString('details_compatible', [version.compatibility.seamonkey.min]);
-      show = 'download';
-    }
-
-    if (show) {
-      const ul = content.document.createElement('ul');
-      p.appendChild(ul);
-      for (let file of version.files) {
-        const li = content.document.createElement('li');
-        ul.appendChild(li);
-        const a = content.document.createElement('a');
-        li.appendChild(a);
-        if (show == 'convert') {
-          a.href = this.converterURL + "?url=" + encodeURIComponent(file.url);
-          a.textContent = this.getString('details_convert');
-        } else if (show == 'download') {
-          a.href = file.url;
-          a.textContent = this.getString('details_download');
-        }
-        if (file.platform != 'all') {
-          a.textContent += ` (${file.platform})`;
-        }
-      }
-    }
-    return div;
   },
 
   modifyNewSite: function () {

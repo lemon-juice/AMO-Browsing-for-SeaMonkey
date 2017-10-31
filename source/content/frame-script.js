@@ -255,8 +255,12 @@ var newAmoBr = {
 
     newSiteMessage.appendChild(this.createAddonInfoDiv(this.getAddonId()));
 
-    const installButton = content.document.querySelector('div.InstallButton');
-    installButton.style.display = 'none';
+    for (let elementToHide of [
+      content.document.querySelector('div.InstallButton'),
+      content.document.querySelector('.AddonCompatibilityError')
+    ]) {
+      if (elementToHide) elementToHide.style.display = 'none';
+    }
   },
 }
 

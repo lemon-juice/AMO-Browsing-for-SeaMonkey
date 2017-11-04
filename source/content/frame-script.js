@@ -218,7 +218,9 @@ var newAmoBr = {
       const mine = myVersion.length > i
         ? myVersion[i]
         : 0;
-      if (theirMin > mine) {
+      if (theirMin < mine) {
+        return true;
+      } else if (theirMin > mine) {
         return false;
       }
     }
@@ -240,7 +242,9 @@ var newAmoBr = {
       const mine = myVersion.length > i
         ? myVersion[i]
         : 0;
-      if (theirMax < mine) {
+      if (theirMax > mine) {
+        return true;
+      } else if (theirMax < mine) {
         return false;
       }
     }

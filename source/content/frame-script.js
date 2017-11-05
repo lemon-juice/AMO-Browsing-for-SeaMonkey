@@ -876,6 +876,10 @@ var amoBr = {
         item = item.parentElement;
       }
       if (!item) continue;
+
+      var compat = item.querySelector('span.meta.compat');
+      if (!compat) continue;
+      if (/SeaMonkey/.test(compat.innerText)) continue;
       
       var action = item.querySelector('div.action');
       
@@ -889,7 +893,6 @@ var amoBr = {
         div.style.lineHeight = '1.4';
         amoBr.addSanitizedHtmlASDom(div, amoBr.getString('notCompatible'));
       
-        var compat = item.querySelector('span.meta.compat');
         if (compat) {
           // Parse the compatibility string to figure out if this uses WebExtensions or not
           var match = /Firefox.*- ?([0-9]+)/.exec(compat.innerText);

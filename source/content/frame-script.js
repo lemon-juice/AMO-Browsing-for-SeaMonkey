@@ -559,10 +559,13 @@ var amoBr = {
       }
       
       var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href) + "&onlyMaxVersion=true";
+
+      var moreLink = content.document.querySelector(".more-lang a");
       
       if (this.strictAddOns.indexOf(addonData.addonId) >= 0) {
         info += amoBr.getString('maxSupportedVer_strictForced');
-      
+      } else if (moreLink && /language-tools/.test(moreLink.href)) {
+        info += amoBr.getString('maxSupportedVer_strictForced');
       } else {
         var tagStart = "<a href='" + link + "'>";
         var tagEnd = "</a>";

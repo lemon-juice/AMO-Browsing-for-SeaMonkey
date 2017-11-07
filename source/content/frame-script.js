@@ -275,8 +275,9 @@ var amoBr = {
   // Numeric IDs of SeaMonkey add-ons that should not be converted due to strict version
   // check and strict version requirements.
   // For these add-ons the convert option will not be offered.
-  strictAddOns:[
-    2313  // Lightning
+  strictAddOns: [
+    55540, // German language pack
+    2313   // Lightning
   ],
   
   // Numeric IDs of add-ons that work in SeaMonkey without conversion, although
@@ -559,12 +560,8 @@ var amoBr = {
       }
       
       var link = this.converterURL + "?url=" + encodeURIComponent(content.location.href) + "&onlyMaxVersion=true";
-
-      var moreLink = content.document.querySelector(".more-lang a");
       
       if (this.strictAddOns.indexOf(addonData.addonId) >= 0) {
-        info += amoBr.getString('maxSupportedVer_strictForced');
-      } else if (moreLink && /language-tools/.test(moreLink.href)) {
         info += amoBr.getString('maxSupportedVer_strictForced');
       } else {
         var tagStart = "<a href='" + link + "'>";

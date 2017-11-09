@@ -879,7 +879,6 @@ var amoBr = {
 
       var compat = item.querySelector('span.meta.compat');
       if (!compat) continue;
-      if (/SeaMonkey/.test(compat.innerText)) continue;
       
       var action = item.querySelector('div.action');
       
@@ -891,7 +890,9 @@ var amoBr = {
         div.style.fontSize = '8pt';
         div.style.textAlign = 'center';
         div.style.lineHeight = '1.4';
-        amoBr.addSanitizedHtmlASDom(div, amoBr.getString('notCompatible'));
+        if (!/SeaMonkey/.test(compat.innerText)) {
+          amoBr.addSanitizedHtmlASDom(div, amoBr.getString('notCompatible'));
+        }
       
         if (compat) {
           // Parse the compatibility string to figure out if this uses WebExtensions or not

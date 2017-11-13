@@ -405,13 +405,13 @@ var amoBr = {
       if (this.isAddonPage()) {
         if (app == 'seamonkey') {
           this.modifySeaMonkeyPage();
-          
+
           var target = content.document.getElementById('page');
-          
+
           if (target) {
             this.addHoverCardObserver(target);
           }
-          
+
         } else if (app == 'firefox') {
           this.modifyFirefoxPage();
           
@@ -582,10 +582,10 @@ var amoBr = {
   modifyFirefoxPage: function() {
     
     // sometimes there may be 3 huge buttons, each for different OS
-    var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button.CTA');
+    var hugeButtons = content.document.querySelectorAll('#addon p.install-button a.button');
     
     if (hugeButtons.length == 0) {
-      hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button.CTA');
+      hugeButtons = content.document.querySelectorAll('#contribution p.install-button a.button');
     }
     
     if (hugeButtons.length > 0) {
@@ -1030,7 +1030,7 @@ var amoBr = {
       return 'seamonkey';
     }
     
-    if (c.contains('firefox')) {
+    if (c.contains('firefox') || c.contains('android')) {
       return 'firefox';
     }
     

@@ -646,58 +646,11 @@ var amoBr = {
     }
   },
   
-  modifyVersionsPage: function() {
-    // remove buttons for non-SM compatible addons that say "Download Now" instead of "Add to SeaMonkey"
-    var buttons = content.document.querySelectorAll('div.listing div.items p.install-button a.button.download');
-    
-    for (var i=0; i<buttons.length; i++) {
-      var item = buttons[i];
-      while (item && !item.classList.contains('item')) {
-        item = item.parentElement;
-      }
-      if (!item) continue;
-
-      var compat = item.querySelector('span.meta.compat');
-      if (!compat) continue;
-      
-      var action = item.querySelector('div.action');
-      
-      if (action) {
-        var div = content.document.createElement('div');
-        div.style.display = 'inline-block';
-        div.style.maxWidth = '170px';
-        div.style.color = '#999';
-        div.style.fontSize = '8pt';
-        div.style.textAlign = 'center';
-        div.style.lineHeight = '1.4';
-        if (!/SeaMonkey/.test(compat.innerText)) {
-          amoBr.addSanitizedHtmlASDom(div, amoBr.getString('notCompatible'));
-        }
-      
-        if (compat) {
-          // Parse the compatibility string to figure out if this uses WebExtensions or not
-          var match = /Firefox.*- ?([0-9]+)/.exec(compat.innerText);
-          if (match) {
-            var maxVer = +match[1];
-            if (maxVer <= 56) {
-              var xpiURL = buttons[i].href;
-
-              var downloadAnywayLink = item.querySelector('.download-anyway a');
-              if (downloadAnywayLink) {
-                xpiURL = downloadAnywayLink.href;
-              }
-
-              var convertLink = this.converterURL + "?url=" + encodeURIComponent(xpiURL);
-              div.textContent = "";
-              amoBr.addSanitizedHtmlASDom(div, amoBr.getString('convertAddon',
-                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]));
-            }
-          }
-        }
-        
-        action.textContent = '';
-        action.appendChild(div);
-      }
+  modifyVersionsPage: function () {
+    var warning = content.document.querySelector('div.listing div.warning');
+    if (warning) {
+      warning.textContent = this.getString('viewVersionHistory_versionsPage');
+      warning.appendChild(this.createVersionHistoryButton());
     }
   },
   

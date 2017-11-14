@@ -10,7 +10,7 @@ var MessageListener = {
     var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
       .getService(Components.interfaces.nsIWindowMediator)
       .getMostRecentWindow('navigator:browser');
-    win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/versions.html?host=${encodeURIComponent(aMsgEvent.data.hostname)}&id=${aMsgEvent.data.id}`);
+    win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/versions.html?host=${encodeURIComponent(aMsgEvent.data.hostname)}&id=${aMsgEvent.data.id}&beta=${aMsgEvent.data.beta ? "true" : "false"}`);
   }
 };
 

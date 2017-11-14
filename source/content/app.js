@@ -208,13 +208,14 @@ function get_json(url) {
     });
 }
 window.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-    var searchParams, host, id, page, page_size, search_results, addon, versions_response, versions_ext, guid, page_1, replacements, _i, _a, o, other_addon, e_1, e_2, suite_navbar_links, key, value, link;
+    var searchParams, host, id, beta, page, page_size, addon, versions_response, versions_ext, guid, page_1, replacements, _i, _a, o, other_addon, e_1, e_2, suite_navbar_links, key, value, link;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 searchParams = new URLSearchParams(location.search.substr(1));
                 host = searchParams.get('host') || "addons.mozilla.org";
                 id = searchParams.get('id');
+                beta = searchParams.get('beta') == "true";
                 page = +(searchParams.get('page') || "1");
                 page_size = +(searchParams.get('page_size') || "10");
                 if (id == null) {
@@ -222,70 +223,64 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                     return [2 /*return*/];
                 }
                 ko.applyBindings(viewModel, document.body);
-                if (!(id == "random")) return [3 /*break*/, 2];
-                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/search?lang=" + navigator.language + "&page_size=1&sort=random&type=extension&featured=true")];
+                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/addon/" + id + "?lang=" + navigator.language)];
             case 1:
-                search_results = _b.sent();
-                id = search_results.results[0].id;
-                _b.label = 2;
-            case 2: return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/addon/" + id + "?lang=" + navigator.language)];
-            case 3:
                 addon = _b.sent();
                 viewModel.addon(addon);
                 document.title = addon.name + " Version History";
-                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/addon/" + id + "/versions?page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language)];
-            case 4:
+                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/addon/" + id + "/versions?page=" + page + "&page_size=" + page_size + (beta ? "&filter=only_beta" : "") + "&lang=" + navigator.language)];
+            case 2:
                 versions_response = _b.sent();
                 viewModel.page(page);
                 viewModel.last_page(Math.ceil(versions_response.count / page_size));
                 versions_ext = versions_response.results.map(function (v) { return new FlatVersion(addon, v); });
                 viewModel.versions(versions_ext);
-                if (!versions_ext.every(function (v) { return v.file.is_webextension; })) return [3 /*break*/, 17];
-                _b.label = 5;
-            case 5:
-                _b.trys.push([5, 16, , 17]);
+                if (!versions_ext.every(function (v) { return v.file.is_webextension; })) return [3 /*break*/, 15];
+                _b.label = 3;
+            case 3:
+                _b.trys.push([3, 14, , 15]);
                 guid = addon.guid;
                 page_1 = 1;
-                _b.label = 6;
-            case 6:
-                if (!(page_1 <= 10)) return [3 /*break*/, 15];
+                _b.label = 4;
+            case 4:
+                if (!(page_1 <= 10)) return [3 /*break*/, 13];
                 return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/replacement-addon/?page=" + page_1 + "&lang=" + navigator.language)];
-            case 7:
+            case 5:
                 replacements = _b.sent();
                 _i = 0, _a = replacements.results;
-                _b.label = 8;
-            case 8:
-                if (!(_i < _a.length)) return [3 /*break*/, 13];
+                _b.label = 6;
+            case 6:
+                if (!(_i < _a.length)) return [3 /*break*/, 11];
                 o = _a[_i];
-                if (!(o.replacement.indexOf(guid) >= 0)) return [3 /*break*/, 12];
-                _b.label = 9;
-            case 9:
-                _b.trys.push([9, 11, , 12]);
+                if (!(o.replacement.indexOf(guid) >= 0)) return [3 /*break*/, 10];
+                _b.label = 7;
+            case 7:
+                _b.trys.push([7, 9, , 10]);
                 return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/addon/" + o.guid + "?lang=" + navigator.language)];
-            case 10:
+            case 8:
                 other_addon = _b.sent();
                 viewModel.replacements.push(other_addon);
-                return [3 /*break*/, 12];
-            case 11:
+                return [3 /*break*/, 10];
+            case 9:
                 e_1 = _b.sent();
                 console.warn("Could not get addon " + o.guid, e_1);
-                return [3 /*break*/, 12];
-            case 12:
+                return [3 /*break*/, 10];
+            case 10:
                 _i++;
-                return [3 /*break*/, 8];
-            case 13:
-                if (replacements.next == null)
-                    return [3 /*break*/, 15];
-                _b.label = 14;
-            case 14:
-                page_1++;
                 return [3 /*break*/, 6];
-            case 15: return [3 /*break*/, 17];
-            case 16:
+            case 11:
+                if (replacements.next == null)
+                    return [3 /*break*/, 13];
+                _b.label = 12;
+            case 12:
+                page_1++;
+                return [3 /*break*/, 4];
+            case 13: return [3 /*break*/, 15];
+            case 14:
                 e_2 = _b.sent();
                 console.error("Could not query Mozilla recommendation API", e_2);
-                return [3 /*break*/, 17];
-            case 17:
+                return [3 /*break*/, 15];
+            case 15:
                 suite_navbar_links = {
                     first: viewModel.page() > 1
                         ? replacePageParam(1)

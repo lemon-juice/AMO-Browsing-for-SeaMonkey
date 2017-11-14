@@ -232,8 +232,9 @@ async function get_json(url: string) {
 
 window.onload = async () => {
     const searchParams = new URLSearchParams(location.search.substr(1));
-    let host = searchParams.get('host') || "addons.mozilla.org";
-    let id = searchParams.get('id');
+    const host = searchParams.get('host') || "addons.mozilla.org";
+    const id = searchParams.get('id');
+    const beta = searchParams.get('beta') == "true";
     const page = +(searchParams.get('page') || "1");
     const page_size = +(searchParams.get('page_size') || "10");
 
@@ -244,17 +245,12 @@ window.onload = async () => {
 
     ko.applyBindings(viewModel, document.body);
 
-    if (id == "random") {
-        const search_results = await get_json(`https://${host}/api/v3/addons/search?lang=${navigator.language}&page_size=1&sort=random&type=extension&featured=true`);
-        id = search_results.results[0].id;
-    }
-
     const addon: Addon = await get_json(`https://${host}/api/v3/addons/addon/${id}?lang=${navigator.language}`);
     viewModel.addon(addon);
 
     document.title = addon.name + " Version History";
 
-    const versions_response = await get_json(`https://${host}/api/v3/addons/addon/${id}/versions?page=${page}&page_size=${page_size}&lang=${navigator.language}`);
+    const versions_response = await get_json(`https://${host}/api/v3/addons/addon/${id}/versions?page=${page}&page_size=${page_size}${beta ? "&filter=only_beta" : ""}&lang=${navigator.language}`);
     viewModel.page(page);
     viewModel.last_page(Math.ceil(versions_response.count / page_size));
 

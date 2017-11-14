@@ -278,7 +278,7 @@ var amoBr = {
     content.document.head.appendChild(link);
   },
 
-  createVersionHistoryButton: function () {
+  createVersionHistoryButton: function (options) {
     const p = content.document.createElement("p");
 
     const a = content.document.createElement("a");
@@ -289,7 +289,8 @@ var amoBr = {
       e.preventDefault();
       contentFrameMessageManager.sendAsyncMessage("amo-browsing:versions", {
         hostname: content.location.hostname,
-        id: this.getAddonData().addonId
+        id: this.getAddonData().addonId,
+        beta: options && options.beta
       }, true);
     });
     p.appendChild(a);
@@ -650,7 +651,7 @@ var amoBr = {
     var warning = content.document.querySelector('div.listing div.warning');
     if (warning) {
       warning.textContent = this.getString('viewVersionHistory_versionsPage');
-      warning.appendChild(this.createVersionHistoryButton());
+      warning.appendChild(this.createVersionHistoryButton({ beta: /\/versions\/beta/.test(content.location.pathname) }));
     }
   },
   

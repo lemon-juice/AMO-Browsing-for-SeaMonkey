@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Version History</title>
+    <link rel="stylesheet" href="app.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/url-search-params/0.10.0/url-search-params.js" integrity="sha256-Tj0IK7neOvGa1FUIZ433DRvlP/Kv0ffbyyrgQOhdOro=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/native-promise-only/0.8.1/npo.js" integrity="sha256-o/UXdF4sFrbgV5UCIWF5ca7VMLDdplhzA4knJ4nFsc0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js" integrity="sha256-aB35laj7IZhLTx58xw/Gm1EKOoJJKZt6RY+bH1ReHxs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js" integrity="sha256-owX7sroiO/O1a7h3a4X29A1g3QgqdNvijRQ7V5TH45M=" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <header>
+        <h1>AMO Browsing for SeaMonkey</h1>
+    </header>
+
+    <div id="main">
+        <h2 data-bind="with: addon">
+            <span data-bind="text: name"></span> Version History
+        </h2>
+
+        <p>
+            <a href="#" data-bind="click: toggle_release_notes, text: release_notes_shown() ? 'Hide release notes' : 'Show release notes'"></a>
+        </p>
+
+        <!-- ko foreach: versions -->
+        <div class="version" data-bind="css: { app_compatible: app_compatible, convertible: convertible }">
+            <div class="buttons">
+                <!-- ko if: addon.type == 'search' -->
+                <a class="install button" href="#" data-bind="attr: { href: install_url }, click: addSearchProvider">
+                    Add to SeaMonkey
+                </a>
+                <a class="download button" href="#" data-bind="attr: { href: download_url }">
+                    Download .xml
+                </a>
+                <!-- /ko -->
+                <!-- ko if: addon.type != 'search' -->
+                <a class="install button" href="#" data-bind="if: app_compatible, attr: { href: install_url }">
+                    Add to SeaMonkey
+                </a>
+                <a class="convert button" href="#" data-bind="if: convertible, attr: { href: converter_url }">
+                    Convert Add-on
+                </a>
+                <div class="not-compatible" data-bind="if: !app_compatible() && !convertible()">
+                    This add-on is not compatible with your version of SeaMonkey.
+                    <a href="#" data-bind="attr: { href: download_url }">
+                        Download anyway
+                    </a>
+                </div>
+                <a class="download button" href="#" data-bind="if: app_compatible() || convertible(), attr: { href: download_url }">
+                    Download .xpi
+                </a>
+                <!-- /ko -->
+            </div>
+            <div class="version-main">
+                <div class="version-header">
+                    Version
+                    <span data-bind="text: version.version"></span>
+                    <span class="tags">
+                        <span data-bind="if: file.is_restart_required" style="background-color: darkgreen">Restart Required</span>
+                        <span data-bind="if: file.is_webextension" style="background-color: red">WebExtensions</span>
+                        <span data-bind="if: loading()" style="background-color: lightgray">Loading...</span>
+                    </span>
+                </div>
+                <div class="released" data-bind="text: released_display"></div>
+                <div class="compatibility" data-bind="text: compatibility_display"></div>
+                <div class="license" data-bind="with: version.license">
+                    <a href="#" data-bind="attr: { href: url }, text: name"></a>
+                </div>
+                <!-- ko if: $root.release_notes_shown -->
+                <div class="release_notes" data-bind="html: version.release_notes"></div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <!-- /ko -->
+    </div>
+
+    <footer>
+        <a href="#" class="button prev" data-bind="if: prev_page_url, attr: { href: prev_page_url }, click: prev">Previous</a>
+        <a href="#" class="button next" data-bind="if: next_page_url, attr: { href: next_page_url }, click: next">Next</a>
+        <p>
+            Last update: November 13, 2017
+            <br />
+            <a href="https://github.com/lemon-juice/AMO-Browsing-for-SeaMonkey/xpi-versions">View on GitHub</a>
+        </p>
+    </footer>
+</body>
+</html>

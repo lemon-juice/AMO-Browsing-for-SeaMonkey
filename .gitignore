@@ -1,6 +1,18 @@
+.vs/
+*.suo
+*.user
+
+PublishProfiles/
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+/xpi-versions/*.js
+/xpi-versions/*.js.map
+
 /amo-browsing.komodoproject
 /build.bat
 /graphics
 
 *.xpi
-.vs

@@ -1,0 +1,143 @@
+﻿body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    overflow-y: scroll;
+}
+
+header {
+    background-color: #0f1126;
+    color: white;
+    position: relative;
+}
+
+    header a {
+        color: white;
+    }
+
+    header h1 {
+        margin: 0;
+        padding: 0.25em 0;
+    }
+
+#main {
+    margin: 10px;
+}
+
+.version {
+    border-top: 1px dotted gray;
+    padding: 10px;
+}
+
+.buttons {
+    float: right;
+}
+
+    .buttons > .button {
+       display: block;
+    }
+
+    .buttons > .not-compatible {
+        color: gray;
+        font-size: 70%;
+        max-width: 180px;
+        text-align: center;
+    }
+
+.button {
+    display: inline-block;
+    border: 0;
+    border-radius: 5px;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    text-align: center;
+    background-color: royalblue;
+    color: white;
+}
+
+    .button:empty {
+        display: none;
+    }
+
+    .button.install {
+        background-color: green;
+    }
+
+    .button.download {
+        border-color: royalblue;
+        background-color: white;
+        color: royalblue;
+        font-size: 80%;
+    }
+
+    .button.install::before {
+        content: '+';
+        font-size: 200%;
+        font-weight: bold;
+        line-height: 50%;
+        vertical-align: top;
+    }
+
+    .button.download::before {
+        content: '\2B73';
+        font-size: 150%;
+        font-weight: bold;
+        line-height: 100%;
+        vertical-align: top;
+    }
+
+    .button.prev::before {
+        content: '\2190';
+        font-size: 200%;
+        font-weight: bold;
+        line-height: 50%;
+        vertical-align: top;
+    }
+
+    .button.next::after {
+        content: '\2192';
+        font-size: 200%;
+        font-weight: bold;
+        line-height: 50%;
+        vertical-align: top;
+    }
+
+    .button:not(:first-child) {
+        margin-top: 5px;
+    }
+
+.version-header {
+    font-size: 125%;
+    font-weight: bold;
+}
+
+    .version-header .tags > * {
+        background-color: blue;
+        color: white;
+        border-radius: 5px;
+        padding: 1px 5px;
+        font-size: 60%;
+        vertical-align: bottom;
+        line-height: 200%;
+    }
+
+    .version-header .tags > :empty {
+        display: none;
+    }
+
+.released, .compatibility, .license {
+    color: gray;
+    font-size: 70%;
+}
+
+.release_notes:not(:empty) {
+    margin-top: 10px;
+    font-size: 80%;
+    white-space: pre-wrap;
+}
+
+footer {
+    text-align: center;
+    border-top: 1px dotted gray;
+    font-size: 80%;
+}

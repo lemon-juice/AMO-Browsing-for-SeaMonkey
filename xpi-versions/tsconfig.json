@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+    "lib": ["dom", "es5", "es2015.promise"]
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
+}

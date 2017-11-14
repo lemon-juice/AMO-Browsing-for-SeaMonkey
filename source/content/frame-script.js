@@ -1,7 +1,5 @@
 "use strict";
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
 Components.utils.import("resource://gre/modules/Services.jsm");
 
 var contentFrameMessageManager = this;
@@ -21,238 +19,6 @@ var newAmoBr = {
       return addonDiv.getAttribute("data-site-identifier");
     }
     return null;
-  },
-
-
-
-  /* Return a promise that resolves to an object with 1-3 relevant (current or
-     past) versions of an add-on. This could be an async function if we only
-     wanted to support SeaMonkey 2.49+. */
-  getRelevantVersions: (() => {
-    // Async function implemented with generators via babel.
-    var _ref = _asyncToGenerator(function* (id) {
-      // Real function starts here
-      var result = {
-        newestVersion: null,
-        newestSeaMonkeyVersion: null,
-        oldLegacyVersionsExist: false
-      };
-
-      let url = `/api/v3/addons/addon/${id}/versions`;
-      while (url !== null) {
-        const resp = yield content.fetch(url);
-        const resp_json = yield resp.json();
-        for (let version of resp_json.results) {
-          if (result.newestVersion == null) {
-            result.newestVersion = version;
-          }
-          // All other versions that use WebExtensions should be ignored.
-          if (!version.files.every(f => f.is_webextension)) {
-            result.oldLegacyVersionsExist = true;
-            // Find the most recent SeaMonkey-compatible version.
-            if (version.compatibility.seamonkey) {
-              result.newestSeaMonkeyVersion = version;
-              return result;
-            }
-          }
-        }
-        url = resp_json.next;
-      }
-
-      return result;
-    });
-
-    return function getRelevantVersions(_x) {
-      return _ref.apply(this, arguments);
-    };
-  })(),
-
-  /* Return a promise that resolves to a list of possible
-     legacy alternatives for a WebExtension add-on. This could be an async
-     function if we only wanted to support SeaMonkey 2.49+. */
-  getReplacementGuids: (() => {
-    // Async function implemented with generators via babel.
-    var _ref = _asyncToGenerator(function* (id) {
-      // Real function starts here
-      const addon_resp = yield content.fetch(`/api/v3/addons/addon/${id}`);
-      const addon = yield addon_resp.json();
-      const guid = addon.guid;
-
-      const list = [];
-
-      for (let page = 1; page <= 10; page++) {
-        const replacements_resp = yield content.fetch(`/api/v3/addons/replacement-addon/?page=${page}`);
-        const replacements_json = yield replacements_resp.json();
-        for (let o of replacements_json.results) {
-          if (o.replacement.indexOf(guid) >= 0) {
-            const other_addon_resp = yield content.fetch(`/api/v3/addons/addon/${o.guid}`);
-            const other_addon = yield other_addon_resp.json();
-            list.push(other_addon);
-          }
-        }
-        if (replacements_json.next == null) break;
-      }
-
-      return list;
-    });
-
-    return function getReplacementGuids(_x) {
-      return _ref.apply(this, arguments);
-    };
-  })(),
-
-  dateToString: function (dateStr) {
-    return new Date(dateStr).toLocaleDateString([], { year: 'numeric', day: 'numeric', month: 'long' });
-  },
-
-  appendLinkToList: function (ul, href, textContent) {
-    const li = content.document.createElement('li');
-    ul.appendChild(li);
-    const a = content.document.createElement('a');
-    li.appendChild(a);
-    a.href = href;
-    a.textContent = textContent;
-  },
-
-  /* In SeaMonkey 2.49, this could also be an async function (it would reduce
-     some of the nesting.) */
-  createAddonInfoDiv: function (id) {
-    const div = content.document.createElement('div');
-    div.textContent = 'Loading...';
-
-    this.getRelevantVersions(id).then(obj => {
-      div.textContent = '';
-      // Show the most recent SeaMonkey version, or the most recent version overall if none for SeaMonkey.
-      const v = obj.newestSeaMonkeyVersion || obj.newestVersion;
-      if (!v.files.every(f => f.is_webextension)) {
-        // This is a legacy extension.
-        let p = content.document.createElement('p');
-        div.appendChild(p);
-        p.textContent = this.getString(
-          v.compatibility.seamonkey
-            ? 'details_newestSeaMonkeyVersion'
-            : 'details_newestVersion',
-          [v.version, this.dateToString(v.files[0].created)]);
-
-        p.appendChild(content.document.createElement('br'));
-
-        const addlSpan = content.document.createElement('span');
-        p.appendChild(addlSpan);
-
-        const ul = content.document.createElement('ul');
-        p.appendChild(ul);
-        for (let file of v.files) {
-          let href, text;
-          if (v.compatibility.seamonkey) {
-            href = file.url;
-            text = this.getString('details_download');
-          } else {
-            href = this.converterURL + "?url=" + encodeURIComponent(file.url);
-            text = this.getString('details_convert');
-          }
-          if (file.platform != 'all') {
-            text += ` (${file.platform})`;
-          }
-          this.appendLinkToList(ul, href, text);
-        }
-      } else if (obj.oldLegacyVersionsExist) {
-        // The current version uses WebExtensions, but some older versions don't.
-        const p = content.document.createElement('p');
-        p.textContent = this.getString('details_webExtensions');
-        p.textContent += ' ' + this.getString('details_legacyVersionsExist');
-        div.appendChild(p);
-
-        const ul = content.document.createElement('ul');
-        div.appendChild(ul);
-        this.appendLinkToList(
-          ul,
-          content.location.pathname + 'versions',
-          this.getString('details_seeAllVersions'));
-      } else {
-        // There are no legacy versions of this extension.
-        const p1 = content.document.createElement('p');
-        p1.textContent = this.getString('details_webExtensions');
-        div.appendChild(p1);
-
-        // Get possible replacements.
-        const p2 = content.document.createElement('p');
-        p2.textContent = this.getString('details_replacementsLoading');
-        div.appendChild(p2);
-
-        this.getReplacementGuids(id).then(replacements => {
-          if (replacements.length == 0) {
-            p2.textContent = '';
-          } else {
-            p2.textContent = this.getString('details_replacements');
-
-            const ul = content.document.createElement('ul');
-            div.appendChild(ul);
-            for (let r of replacements) {
-              this.appendLinkToList(
-                ul,
-                r.url,
-                r.name[r.default_locale]);
-            }
-          }
-        }).catch(e => {
-          content.console.error(e);
-          p2.textContent = this.getString('details_error');
-        });
-      }
-    }).catch(e => {
-      content.console.error(e);
-      div.textContent = this.getString('details_error');
-    });
-
-    return div;
-  },
-
-  checkMinVersion: function (min) {
-    const addonMinVersion = min.split('.');
-
-    const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent);
-    const myVersion = smVersionMatch
-      ? smVersionMatch[1].split('.')
-      : [Infinity];
-
-    for (let i = 0; i < addonMinVersion.length; i++) {
-      const theirMin = addonMinVersion[i] == '*'
-        ? 0
-        : +addonMinVersion[i];
-      const mine = myVersion.length > i
-        ? myVersion[i]
-        : 0;
-      if (theirMin < mine) {
-        return true;
-      } else if (theirMin > mine) {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  checkMaxVersion: function (max) {
-    const addonMaxVersion = max.split('.');
-
-    const smVersionMatch = /SeaMonkey\/([0-9\.]+)/.exec(content.navigator.userAgent);
-    const myVersion = smVersionMatch
-      ? smVersionMatch[1].split('.')
-      : [Infinity];
-
-    for (let i = 0; i < addonMaxVersion.length; i++) {
-      const theirMax = addonMaxVersion[i] == '*'
-        ? Infinity
-        : +addonMaxVersion[i];
-      const mine = myVersion.length > i
-        ? myVersion[i]
-        : 0;
-      if (theirMax > mine) {
-        return true;
-      } else if (theirMax < mine) {
-        return false;
-      }
-    }
-    return true;
   },
 
   modifyNewSite: function () {
@@ -277,8 +43,6 @@ var newAmoBr = {
         id: this.getAddonId()
       }, true);
     });
-
-    newSiteMessage.appendChild(this.createAddonInfoDiv(this.getAddonId()));
 
     for (let elementToHide of [
       content.document.querySelector('div.InstallButton'),
@@ -315,7 +79,7 @@ var amoBr = {
   },
   
   /* Get localized string */
-  getString: function(name, params) {
+  getString: function (name, params) {
     if (!params) {
       return this.stringBundle.GetStringFromName(name);
     }
@@ -556,12 +320,7 @@ var amoBr = {
       return;
     }
     
-    extra.style.opacity = '0.6';
-
-    var label = content.document.createElement('div');
-    label.textContent = this.getString('officialStatus');
-    label.className = 'amobrowsing-official-status';
-    extra.insertBefore(label, extra.firstChild);
+    extra.firstChild.style.display = 'none';
     
     var infoElem = content.document.createElement('div');
     extra.parentNode.insertBefore(infoElem, extra);
@@ -609,10 +368,6 @@ var amoBr = {
         var tagEnd = "</a>";
         info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
       }
-
-      // grey button:
-      button.style.background = '';
-      button.classList.add('concealed');
       
       amoBr.addSanitizedHtmlASDom(infoElem, info);
       infoElem.classList.add('incompatible');
@@ -685,9 +440,6 @@ var amoBr = {
     }
 
     infoElem.textContent = amoBr.getString('viewVersionHistoryFxTB');
-
-    const id = +content.document.querySelector('.install').getAttribute('data-addon');
-    infoElem.appendChild(newAmoBr.createAddonInfoDiv(id));
     
     hugeButton.parentNode.appendChild(infoElem);
   },
@@ -714,23 +466,6 @@ var amoBr = {
     
     infoElem.textContent = amoBr.getString('viewVersionHistoryFxTB');
 
-
-    var addonData = this.getAddonData();
-    var info = '';
-
-    if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
-      info = amoBr.getString('TbInfo',
-        ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>",
-        "<a  href='" + converterLink + "'>", "</a>"]) + '<br/><br/>'
-        + amoBr.getString('convertAddon',
-          ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
-
-    } else {
-      info = amoBr.getString('SmVersionExists',
-        ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>"]);
-    }
-
-    amoBr.addSanitizedHtmlASDom(infoElem, info);
     shell.appendChild(infoElem);
   },
 

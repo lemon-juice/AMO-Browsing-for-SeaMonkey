@@ -4,6 +4,16 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 
 var sessionStartTime;
 
+var MessageListener = {
+  // https://stackoverflow.com/a/21701667/5170952
+  receiveMessage: function (aMsgEvent) {
+    var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
+      .getService(Components.interfaces.nsIWindowMediator)
+      .getMostRecentWindow('navigator:browser');
+    win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/versions.html?host=${encodeURIComponent(aMsgEvent.data.hostname)}&id=${aMsgEvent.data.id}`);
+  }
+};
+
 function startup(data,reason) {
   // we use time to append to frame sript URLs to make upgrades effective immediately
   // due to Bug 1051238
@@ -16,6 +26,7 @@ function startup(data,reason) {
   });
   
   Services.wm.addListener(WindowListener);
+  Services.mm.addMessageListener("amo-browsing:versions", MessageListener);
 }
 
 function shutdown(data,reason) {
@@ -30,6 +41,7 @@ function shutdown(data,reason) {
   });
   
   Services.wm.removeListener(WindowListener);
+  Services.mm.removeMessageListener("amo-browsing:versions", MessageListener);
   Services.obs.notifyObservers(null, "chrome-flush-caches", null);
 }
 

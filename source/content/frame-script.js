@@ -4,6 +4,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 
+var contentFrameMessageManager = this;
+
 var newAmoBr = {
   converterURL: 'http://addonconverter.fotokraina.com/',
 
@@ -20,6 +22,8 @@ var newAmoBr = {
     }
     return null;
   },
+
+
 
   /* Return a promise that resolves to an object with 1-3 relevant (current or
      past) versions of an add-on. This could be an async function if we only
@@ -75,7 +79,7 @@ var newAmoBr = {
       const guid = addon.guid;
 
       const list = [];
-      
+
       for (let page = 1; page <= 10; page++) {
         const replacements_resp = yield content.fetch(`/api/v3/addons/replacement-addon/?page=${page}`);
         const replacements_json = yield replacements_resp.json();
@@ -257,6 +261,23 @@ var newAmoBr = {
     var newSiteMessage = content.document.createElement("div");
     addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
 
+    newSiteMessage.textContent = amoBr.getString('viewVersionHistoryFxTB');
+
+    const p = content.document.createElement('p');
+    newSiteMessage.appendChild(p);
+    const a = content.document.createElement('a');
+    p.appendChild(a);
+    a.className = "Button--action";
+    a.href = "#";
+    a.textContent = amoBr.getString('viewVersionHistory');
+    a.addEventListener("click", e => {
+      e.preventDefault();
+      contentFrameMessageManager.sendAsyncMessage("amo-browsing:versions", {
+        hostname: content.location.hostname,
+        id: this.getAddonId()
+      }, true);
+    });
+
     newSiteMessage.appendChild(this.createAddonInfoDiv(this.getAddonId()));
 
     for (let elementToHide of [
@@ -418,7 +439,8 @@ var amoBr = {
         } else if (app == 'thunderbird') {
           this.modifyThunderbirdPage();
         }
-        
+
+        content.document.getElementById('addon').appendChild(this.createVersionHistoryButton());
       } else {
         // not add-on page
         if (this.isListingPage()) {
@@ -491,6 +513,25 @@ var amoBr = {
     link.setAttribute('href', 'chrome://amobrowsing/content/style.css');
     content.document.head.appendChild(link);
   },
+
+  createVersionHistoryButton: function () {
+    const p = content.document.createElement("p");
+
+    const a = content.document.createElement("a");
+    a.className = "button";
+    a.textContent = this.getString('viewVersionHistory');
+    a.href = "#";
+    a.addEventListener("click", e => {
+      e.preventDefault();
+      contentFrameMessageManager.sendAsyncMessage("amo-browsing:versions", {
+        hostname: content.location.hostname,
+        id: this.getAddonData().addonId
+      }, true);
+    });
+    p.appendChild(a);
+
+    return p;
+  },
   
   /* Modify SeaMonkey add-on page */
   modifySeaMonkeyPage: function() {
@@ -516,7 +557,7 @@ var amoBr = {
     }
     
     extra.style.opacity = '0.6';
-    
+
     var label = content.document.createElement('div');
     label.textContent = this.getString('officialStatus');
     label.className = 'amobrowsing-official-status';
@@ -568,7 +609,7 @@ var amoBr = {
         var tagEnd = "</a>";
         info += amoBr.getString('maxSupportedVer_strict', [tagStart, tagEnd]);
       }
-      
+
       // grey button:
       button.style.background = '';
       button.classList.add('concealed');
@@ -643,6 +684,8 @@ var amoBr = {
       infoElem.style.maxWidth = '400px';
     }
 
+    infoElem.textContent = amoBr.getString('viewVersionHistoryFxTB');
+
     const id = +content.document.querySelector('.install').getAttribute('data-addon');
     infoElem.appendChild(newAmoBr.createAddonInfoDiv(id));
     
@@ -669,22 +712,24 @@ var amoBr = {
     var converterLink = this.converterURL;
     var convertLink = this.converterURL + "?url=" + encodeURIComponent(content.location.href);
     
-    
+    infoElem.textContent = amoBr.getString('viewVersionHistoryFxTB');
+
+
     var addonData = this.getAddonData();
     var info = '';
-    
+
     if (this.strictAddOns.indexOf(addonData.addonId) < 0) {
       info = amoBr.getString('TbInfo',
-                ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>",
-                 "<a  href='" + converterLink + "'>", "</a>"]) + '<br/><br/>'
-              + amoBr.getString('convertAddon',
-                ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
-  
+        ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>",
+        "<a  href='" + converterLink + "'>", "</a>"]) + '<br/><br/>'
+        + amoBr.getString('convertAddon',
+          ["<a href='" + convertLink + "' style='font-weight: bold'>", "</a>"]);
+
     } else {
       info = amoBr.getString('SmVersionExists',
-                ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>"]);
+        ["<a href='" + SMLink + "' style='font-weight: bold'>", "</a>"]);
     }
-    
+
     amoBr.addSanitizedHtmlASDom(infoElem, info);
     shell.appendChild(infoElem);
   },

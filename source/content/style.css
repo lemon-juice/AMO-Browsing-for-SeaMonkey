@@ -8,7 +8,7 @@ div.amobrowsing-info {
   background: rgba(255,255,255,0.15);
 }
 /* contribution page is white (not blue) */
-div.amobrowsing-info a {
+div.amobrowsing-info a:not(.button) {
   color: white;
   text-decoration: underline;
 }

@@ -61,7 +61,6 @@
                     <span class="tags">
                         <span data-bind="if: file.is_restart_required" style="background-color: darkgreen">Restart Required</span>
                         <span data-bind="if: file.is_webextension" style="background-color: red">WebExtensions</span>
-                        <span data-bind="if: loading()" style="background-color: lightgray">Loading...</span>
                     </span>
                 </div>
                 <div class="released" data-bind="text: released_display"></div>
@@ -81,7 +80,7 @@
         <a href="#" class="button prev" data-bind="if: prev_page_url, attr: { href: prev_page_url }, click: prev">Previous</a>
         <a href="#" class="button next" data-bind="if: next_page_url, attr: { href: next_page_url }, click: next">Next</a>
         <p>
-            Last update: November 13, 2017
+            Last update: November 14, 2017
             <br />
             <a href="https://github.com/lemon-juice/AMO-Browsing-for-SeaMonkey/xpi-versions">View on GitHub</a>
         </p>

@@ -1,4 +1,5 @@
 ﻿interface Addon {
+    id: number;
     name: string;
     type: "theme" | "search" | "persona" | "language" | "extension" | "dictionary";
 }
@@ -83,6 +84,7 @@ const platform = (() => {
 
 class FlatVersion {
     readonly file: AmoFile;
+    readonly strict: boolean;
 
     readonly install_url: string;
     readonly download_url: string;
@@ -100,6 +102,8 @@ class FlatVersion {
             ...version.files.filter(f => f.platform == platform || f.platform == "all"),
             ...version.files
         ][0];
+        this.strict = addon.type == "language" // All language packs
+            || addon.id == 2313; // Lightning
 
         const xpi_url = this.file.url.replace(/src=$/, "src=version-history");
         this.install_url = xpi_url;
@@ -145,7 +149,7 @@ class FlatVersion {
             const amo_compat = this.version.compatibility["seamonkey"];
             if (!amo_compat) return false; // Not compatible
             if (!FlatVersion.checkMinVersion(amo_compat.min)) return false; // Only supports newer versions
-            if (addon.type == "language") {
+            if (this.strict) {
                 if (!FlatVersion.checkMaxVersion(amo_compat.max)) return false; // Only supports older versions
             }
             if (this.file.is_webextension) return false; // No WebExtensions support
@@ -157,8 +161,8 @@ class FlatVersion {
         this.convertible = ko.pureComputed(() => {
             if (this.addon.type != "extension") return false;
 
-            const amo_compat = this.version.compatibility["seamonkey"];
-            if (amo_compat) return false;
+            if (this.app_compatible()) return false;
+            if (this.strict) return false;
 
             return !this.file.is_webextension;
         });

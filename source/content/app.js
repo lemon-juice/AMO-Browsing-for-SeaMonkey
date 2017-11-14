@@ -80,6 +80,8 @@ var FlatVersion = /** @class */ (function () {
         this.addon = addon;
         this.version = version;
         this.file = version.files.filter(function (f) { return f.platform == platform || f.platform == "all"; }).concat(version.files)[0];
+        this.strict = addon.type == "language" // All language packs
+            || addon.id == 2313; // Lightning
         var xpi_url = this.file.url.replace(/src=$/, "src=version-history");
         this.install_url = xpi_url;
         this.download_url = xpi_url.replace(/downloads\/file\/([0-9]+)/, "downloads/file/$1/type:attachment");
@@ -120,7 +122,7 @@ var FlatVersion = /** @class */ (function () {
                 return false; // Not compatible
             if (!FlatVersion.checkMinVersion(amo_compat.min))
                 return false; // Only supports newer versions
-            if (addon.type == "language") {
+            if (_this.strict) {
                 if (!FlatVersion.checkMaxVersion(amo_compat.max))
                     return false; // Only supports older versions
             }
@@ -132,8 +134,9 @@ var FlatVersion = /** @class */ (function () {
         this.convertible = ko.pureComputed(function () {
             if (_this.addon.type != "extension")
                 return false;
-            var amo_compat = _this.version.compatibility["seamonkey"];
-            if (amo_compat)
+            if (_this.app_compatible())
+                return false;
+            if (_this.strict)
                 return false;
             return !_this.file.is_webextension;
         });

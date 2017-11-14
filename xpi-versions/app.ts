@@ -1,5 +1,6 @@
 ﻿interface Addon {
     id: number;
+    guid: string;
     name: string;
     type: "theme" | "search" | "persona" | "language" | "extension" | "dictionary";
 }
@@ -44,6 +45,7 @@ function replacePageParam(page: number) {
 
 const viewModel = {
     addon: ko.observable<Addon>(),
+    replacements: ko.observableArray<Addon>(),
     versions: ko.observableArray<FlatVersion>(),
     page: ko.observable<number>(),
     last_page: ko.observable<number>(),
@@ -247,7 +249,7 @@ window.onload = async () => {
         id = search_results.results[0].id;
     }
 
-    const addon = await get_json(`https://${host}/api/v3/addons/addon/${id}?lang=${navigator.language}`);
+    const addon: Addon = await get_json(`https://${host}/api/v3/addons/addon/${id}?lang=${navigator.language}`);
     viewModel.addon(addon);
 
     document.title = addon.name + " Version History";
@@ -256,8 +258,31 @@ window.onload = async () => {
     viewModel.page(page);
     viewModel.last_page(Math.ceil(versions_response.count / page_size));
 
-    const versions_ext = versions_response.results.map((v: AmoVersion) => new FlatVersion(addon, v));
+    const versions_ext = (versions_response.results as AmoVersion[]).map(v => new FlatVersion(addon, v));
     viewModel.versions(versions_ext);
+
+    if (versions_ext.every(v => v.file.is_webextension)) {
+        try {
+            const guid = addon.guid;
+
+            for (let page = 1; page <= 10; page++) {
+                const replacements = await get_json(`https://${host}/api/v3/addons/replacement-addon/?page=${page}&lang=${navigator.language}`);
+                for (let o of replacements.results) {
+                    if (o.replacement.indexOf(guid) >= 0) {
+                        try {
+                            const other_addon = await get_json(`https://${host}/api/v3/addons/addon/${o.guid}?lang=${navigator.language}`);
+                            viewModel.replacements.push(other_addon);
+                        } catch (e) {
+                            console.warn("Could not get addon " + o.guid, e);
+                        }
+                    }
+                }
+                if (replacements.next == null) break;
+            }
+        } catch (e) {
+            console.error("Could not query Mozilla recommendation API", e);
+        }
+    }
 
     const suite_navbar_links: any = {
         first: viewModel.page() > 1

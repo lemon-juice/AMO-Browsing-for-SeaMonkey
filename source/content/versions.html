@@ -21,6 +21,17 @@
             <span data-bind="text: name"></span> Version History
         </h2>
 
+        <!-- ko if: replacements().length -->
+        <p>
+            This add-on uses the WebExtensions API, which is not yet supported in SeaMonkey. According to Mozilla's recommendation service, these older Firefox add-ons might be similar:
+        </p>
+        <ul data-bind="foreach: replacements">
+            <li>
+                <a href="#" data-bind="attr: { href: url }, text: name"></a>
+            </li>
+        </ul>
+        <!-- /ko -->
+
         <p>
             <a href="#" data-bind="click: toggle_release_notes, text: release_notes_shown() ? 'Hide release notes' : 'Show release notes'"></a>
         </p>
@@ -79,11 +90,6 @@
     <footer>
         <a href="#" class="button prev" data-bind="if: prev_page_url, attr: { href: prev_page_url }, click: prev">Previous</a>
         <a href="#" class="button next" data-bind="if: next_page_url, attr: { href: next_page_url }, click: next">Next</a>
-        <p>
-            Last update: November 14, 2017
-            <br />
-            <a href="https://github.com/lemon-juice/AMO-Browsing-for-SeaMonkey/xpi-versions">View on GitHub</a>
-        </p>
     </footer>
 </body>
 </html>

@@ -44,8 +44,7 @@ var viewModel = {
     prev_page_url: ko.pureComputed(function () { return ""; }),
     next_page_url: ko.pureComputed(function () { return ""; }),
     prev: function () { return location.href = viewModel.prev_page_url(); },
-    next: function () { return location.href = viewModel.next_page_url(); },
-    toggle_release_notes: function () { return viewModel.release_notes_shown(!viewModel.release_notes_shown()); }
+    next: function () { return location.href = viewModel.next_page_url(); }
 };
 viewModel.prev_page_url = ko.pureComputed(function () { return viewModel.page() > 1
     ? replacePageParam(viewModel.page() - 1)

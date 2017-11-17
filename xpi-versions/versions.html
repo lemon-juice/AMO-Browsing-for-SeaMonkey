@@ -17,8 +17,15 @@
     </header>
 
     <div id="main">
+        <div style="float: right; text-align: right">
+            <label>
+                <input type="checkbox" data-bind="checked: release_notes_shown" />
+                Show release notes
+            </label>
+        </div>
+
         <h2 data-bind="with: addon">
-            <span data-bind="text: name"></span> Version History
+            Version History for <a href="#" data-bind="attr: { href: url }, text: name"></a>
         </h2>
 
         <!-- ko if: replacements().length -->
@@ -31,10 +38,6 @@
             </li>
         </ul>
         <!-- /ko -->
-
-        <p>
-            <a href="#" data-bind="click: toggle_release_notes, text: release_notes_shown() ? 'Hide release notes' : 'Show release notes'"></a>
-        </p>
 
         <!-- ko foreach: versions -->
         <div class="version" data-bind="css: { app_compatible: app_compatible, convertible: convertible }">

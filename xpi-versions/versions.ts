@@ -10,8 +10,7 @@
     next_page_url: ko.pureComputed(() => ""),
 
     prev: () => location.href = viewModel.prev_page_url(),
-    next: () => location.href = viewModel.next_page_url(),
-    toggle_release_notes: () => viewModel.release_notes_shown(!viewModel.release_notes_shown())
+    next: () => location.href = viewModel.next_page_url()
 };
 
 viewModel.prev_page_url = ko.pureComputed(() => viewModel.page() > 1

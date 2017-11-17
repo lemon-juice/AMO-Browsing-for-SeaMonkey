@@ -38,6 +38,7 @@ var searchModel = {
     addons: ko.observableArray(),
     page: ko.observable(),
     last_page: ko.observable(),
+    host: ko.observable(),
     type: ko.observable(),
     sort: ko.observable(),
     q: ko.observable(),
@@ -65,6 +66,7 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                 page = +(searchParams.get('page') || "1");
                 page_size = +(searchParams.get('page_size') || "10");
                 ko.applyBindings(searchModel, document.body);
+                searchModel.host(host);
                 searchModel.type(type);
                 searchModel.sort(sort);
                 searchModel.q(q);
@@ -75,7 +77,7 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                 addons_response = _a.sent();
                 searchModel.page(page);
                 searchModel.last_page(Math.ceil(addons_response.count / page_size));
-                addons = addons_response.results;
+                addons = addons_response.results.map(function (a) { return new FlatVersion(a, a.current_version); });
                 searchModel.addons(addons);
                 suite_navbar_links = {
                     first: searchModel.page() > 1

@@ -1,8 +1,9 @@
 ﻿const searchModel = {
-    addons: ko.observableArray<Addon>(),
+    addons: ko.observableArray<FlatVersion>(),
     page: ko.observable<number>(),
     last_page: ko.observable<number>(),
 
+    host: ko.observable<string>(),
     type: ko.observable<string>(),
     sort: ko.observable<string>(),
     q: ko.observable<string>(),
@@ -32,6 +33,7 @@ window.onload = async () => {
 
     ko.applyBindings(searchModel, document.body);
 
+    searchModel.host(host);
     searchModel.type(type);
     searchModel.sort(sort);
     searchModel.q(q);
@@ -42,7 +44,7 @@ window.onload = async () => {
     searchModel.page(page);
     searchModel.last_page(Math.ceil(addons_response.count / page_size));
 
-    const addons = addons_response.results as Addon[];
+    const addons = (addons_response.results as Addon[]).map(a => new FlatVersion(a, a.current_version));
     searchModel.addons(addons);
 
     const suite_navbar_links: any = {

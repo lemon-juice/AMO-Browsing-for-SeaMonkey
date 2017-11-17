@@ -1,0 +1,57 @@
+﻿const searchModel = {
+    addons: ko.observableArray<Addon>(),
+    page: ko.observable<number>(),
+    last_page: ko.observable<number>(),
+
+    prev_page_url: ko.pureComputed(() => ""),
+    next_page_url: ko.pureComputed(() => ""),
+
+    prev: () => location.href = searchModel.prev_page_url(),
+    next: () => location.href = searchModel.next_page_url()
+};
+
+searchModel.prev_page_url = ko.pureComputed(() => searchModel.page() > 1
+    ? replacePageParam(searchModel.page() - 1)
+    : "");
+searchModel.next_page_url = ko.pureComputed(() => searchModel.page() < searchModel.last_page()
+    ? replacePageParam(searchModel.page() + 1)
+    : "");
+
+window.onload = async () => {
+    const searchParams = new URLSearchParams(location.search.substr(1));
+    const host = searchParams.get('host') || "addons.mozilla.org";
+    const q = searchParams.get('q');
+    const page = +(searchParams.get('page') || "1");
+    const page_size = +(searchParams.get('page_size') || "10");
+
+    ko.applyBindings(searchModel, document.body);
+
+    if (!q) return;
+
+    const addons_response = await get_json(`https://${host}/api/v3/addons/search?q=${encodeURIComponent(q)}&page=${page}&page_size=${page_size}&lang=${navigator.language}`);
+    searchModel.page(page);
+    searchModel.last_page(Math.ceil(addons_response.count / page_size));
+
+    const addons = addons_response.results as Addon[];
+    searchModel.addons(addons);
+
+    const suite_navbar_links: any = {
+        first: searchModel.page() > 1
+            ? replacePageParam(1)
+            : "",
+        prev: searchModel.prev_page_url(),
+        next: searchModel.next_page_url(),
+        last: searchModel.page() < searchModel.last_page()
+            ? replacePageParam(searchModel.last_page())
+            : ""
+    };
+    for (let key in suite_navbar_links) {
+        const value = suite_navbar_links[key];
+        if (value) {
+            const link = document.createElement("link");
+            link.rel = key;
+            link.href = value;
+            document.head.appendChild(link);
+        }
+    }
+};

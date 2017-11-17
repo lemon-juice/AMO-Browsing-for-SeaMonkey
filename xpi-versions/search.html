@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Version History</title>
+    <link rel="stylesheet" href="main.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/url-search-params/0.10.0/url-search-params.js" integrity="sha256-Tj0IK7neOvGa1FUIZ433DRvlP/Kv0ffbyyrgQOhdOro=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js" integrity="sha256-aB35laj7IZhLTx58xw/Gm1EKOoJJKZt6RY+bH1ReHxs=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js" integrity="sha256-owX7sroiO/O1a7h3a4X29A1g3QgqdNvijRQ7V5TH45M=" crossorigin="anonymous"></script>
+    <script src="shared.js"></script>
+    <script src="search.js"></script>
+</head>
+<body>
+    <header>
+        <h1>AMO Browsing for SeaMonkey</h1>
+    </header>
+
+    <div id="main">
+        <h2>
+            Search
+        </h2>
+
+        <form method="get" style="display: flex; flex-direction: row; margin: 10px 0;">
+            <input type="search" name="q" style="flex: 1 0 auto;" />
+            <select name="host" style="margin: 0 0.5em;">
+                <option>addons.mozilla.org</option>
+                <option>addons-dev.allizom.org</option>
+                <option>addons.thunderbird.net</option>
+            </select>
+            <input type="submit" value="Search" />
+        </form>
+
+        <!-- ko foreach: addons -->
+        <div class="version">
+            <div class="version-main">
+                <div class="version-header">
+                    <a href="#" data-bind="attr: { href: url }, text: name"></a>
+                </div>
+            </div>
+        </div>
+        <!-- /ko -->
+    </div>
+
+    <footer>
+        <a href="#" class="button prev" data-bind="if: prev_page_url, attr: { href: prev_page_url }, click: prev">Previous</a>
+        <a href="#" class="button next" data-bind="if: next_page_url, attr: { href: next_page_url }, click: next">Next</a>
+    </footer>
+</body>
+</html>

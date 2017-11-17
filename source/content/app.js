@@ -34,6 +34,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
+function replacePageParam(page) {
+    var searchParams = new URLSearchParams(location.search.substr(1));
+    searchParams.set("page", "" + page);
+    return location.protocol + "//" + location.host + location.pathname + "?" + searchParams;
+}
 var viewModel = {
     addon: ko.observable(),
     replacements: ko.observableArray(),
@@ -184,6 +189,24 @@ var FlatVersion = /** @class */ (function () {
     };
     return FlatVersion;
 }());
+function get_json(url) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0: return [4 /*yield*/, fetch(url)];
+                case 1:
+                    response = _c.sent();
+                    if (!(response.status >= 400)) return [3 /*break*/, 3];
+                    _a = Error.bind;
+                    _b = url + " returned status code " + response.status + ": ";
+                    return [4 /*yield*/, response.text()];
+                case 2: throw new (_a.apply(Error, [void 0, _b + (_c.sent())]))();
+                case 3: return [2 /*return*/, response.json()];
+            }
+        });
+    });
+}
 window.onload = function () { return __awaiter(_this, void 0, void 0, function () {
     var searchParams, host, id, beta, page, page_size, addon, versions_response, versions_ext, guid, page_1, replacements, _i, _a, o, other_addon, e_1, e_2, suite_navbar_links, key, value, link;
     return __generator(this, function (_b) {
@@ -281,4 +304,4 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
         }
     });
 }); };
-//# sourceMappingURL=versions.js.map
+//# sourceMappingURL=app.js.map

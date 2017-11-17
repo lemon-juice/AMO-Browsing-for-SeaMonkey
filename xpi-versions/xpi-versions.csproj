@@ -57,10 +57,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="main.css" />
+    <Content Include="search.html" />
     <Content Include="versions.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="shared.ts" />
+    <TypeScriptCompile Include="search.ts" />
     <TypeScriptCompile Include="versions.ts" />
     <TypeScriptCompile Include="knockout.d.ts" />
   </ItemGroup>

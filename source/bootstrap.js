@@ -10,7 +10,12 @@ var MessageListener = {
     var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
       .getService(Components.interfaces.nsIWindowMediator)
       .getMostRecentWindow('navigator:browser');
-    win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/versions.html?host=${encodeURIComponent(aMsgEvent.data.hostname)}&id=${aMsgEvent.data.id}&beta=${aMsgEvent.data.beta ? "true" : "false"}`);
+    const data = aMsgEvent.data || {};
+    if (aMsgEvent.name == "amo-browsing:versions") {
+      win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/versions.html?host=${encodeURIComponent(data.hostname)}&id=${data.id}&beta=${data.beta ? "true" : "false"}`);
+    } else if (aMsgEvent.name == "amo-browsing:search") {
+      win.gBrowser.selectedTab = win.gBrowser.addTab(`chrome://amobrowsing/content/search.html?host=${encodeURIComponent(data.hostname)}&q=${encodeURIComponent(data.q || "")}`);
+    }
   }
 };
 
@@ -27,6 +32,7 @@ function startup(data,reason) {
   
   Services.wm.addListener(WindowListener);
   Services.mm.addMessageListener("amo-browsing:versions", MessageListener);
+  Services.mm.addMessageListener("amo-browsing:search", MessageListener);
 }
 
 function shutdown(data,reason) {
@@ -42,6 +48,7 @@ function shutdown(data,reason) {
   
   Services.wm.removeListener(WindowListener);
   Services.mm.removeMessageListener("amo-browsing:versions", MessageListener);
+  Services.mm.removeMessageListener("amo-browsing:search", MessageListener);
   Services.obs.notifyObservers(null, "chrome-flush-caches", null);
 }
 

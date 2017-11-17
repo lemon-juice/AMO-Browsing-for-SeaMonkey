@@ -181,6 +181,8 @@ var amoBr = {
       return;
     }
 
+    this.addHeaderSearchLink();
+
     /* Delay until AMO scripts have run */
     content.setTimeout(() => {
       //this.displayGrabbedLinks();
@@ -219,6 +221,32 @@ var amoBr = {
         this.modifyHoverCards();
       }
     }, 0);
+  },
+
+
+  /**
+   * Add a link in the header to the built-in search page.
+   */
+  addHeaderSearchLink: function () {
+    const amo_header = content.document.querySelector(".amo-header");
+    if (amo_header) {
+      const search_q = content.document.getElementById("search-q");
+      const a = content.document.createElement("a");
+      a.style.position = "absolute";
+      a.style.top = "100px";
+      a.style.right = "12px";
+      a.href = "#";
+      a.textContent = this.getString("searchUsingExtension");
+      a.style.color = "white";
+      amo_header.appendChild(a);
+      a.addEventListener("click", e => {
+        e.preventDefault();
+        contentFrameMessageManager.sendAsyncMessage("amo-browsing:search", {
+          hostname: content.location.hostname,
+          q: search_q && search_q.value
+        }, true);
+      });
+    }
   },
 
   

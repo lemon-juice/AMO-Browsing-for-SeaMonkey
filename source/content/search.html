@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/url-search-params/0.10.0/url-search-params.js" integrity="sha256-Tj0IK7neOvGa1FUIZ433DRvlP/Kv0ffbyyrgQOhdOro=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js" integrity="sha256-aB35laj7IZhLTx58xw/Gm1EKOoJJKZt6RY+bH1ReHxs=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js" integrity="sha256-owX7sroiO/O1a7h3a4X29A1g3QgqdNvijRQ7V5TH45M=" crossorigin="anonymous"></script>
+    <script src="shared.js"></script>
     <script src="search.js"></script>
 </head>
 <body>
@@ -20,14 +21,43 @@
             Search
         </h2>
 
-        <form method="get" style="display: flex; flex-direction: row;">
-            <input type="search" name="q" style="flex: 1 0 auto;" />
-            <select name="host" style="margin: 0 0.5em;">
-                <option>addons.mozilla.org</option>
-                <option>addons-dev.allizom.org</option>
-                <option>addons.thunderbird.net</option>
-            </select>
-            <input type="submit" value="Search" />
+        <form method="get">
+            <div style="display: flex; flex-direction: row; margin: 10px 0;">
+                <input type="search" name="q" data-bind="value: q" style="flex: 1 0 auto;" />
+                <select name="host" style="margin-left: 0.5em;">
+                    <option>addons.mozilla.org</option>
+                    <option>addons-dev.allizom.org</option>
+                    <option>addons.thunderbird.net</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; flex-direction: row; margin: 10px 0;">
+                <label>
+                    Type:
+                    <select name="type" data-bind="value: type">
+                        <option value="theme">Complete Themes</option>
+                        <option value="dictionary">Dictionaries</option>
+                        <option value="extension">Extensions</option>
+                        <option value="language">Language Packs</option>
+                        <option value="persona">Lightweight Themes</option>
+                        <option value="search">Search Engines</option>
+                    </select>
+                </label>
+                <label style="margin-left: 0.5em;">
+                    Sort by:
+                    <select name="sort" data-bind="value: sort">
+                        <option value="created">Created</option>
+                        <option value="users">Daily users</option>
+                        <option value="hotness">Hotness</option>
+                        <option value="updated">Last updated</option>
+                        <option value="rating">Rating</option>
+                        <option value="relevance">Relevance</option>
+                        <option value="downloads">Weekly downloads</option>
+                    </select>
+                </label>
+                <div style="flex: 1 0 auto;"></div>
+                <input type="submit" value="Search" />
+            </div>
         </form>
 
         <!-- ko foreach: addons -->

@@ -3,6 +3,10 @@
     page: ko.observable<number>(),
     last_page: ko.observable<number>(),
 
+    type: ko.observable<string>(),
+    sort: ko.observable<string>(),
+    q: ko.observable<string>(),
+
     prev_page_url: ko.pureComputed(() => ""),
     next_page_url: ko.pureComputed(() => ""),
 
@@ -20,15 +24,21 @@ searchModel.next_page_url = ko.pureComputed(() => searchModel.page() < searchMod
 window.onload = async () => {
     const searchParams = new URLSearchParams(location.search.substr(1));
     const host = searchParams.get('host') || "addons.mozilla.org";
+    const type = searchParams.get('type') || "extension";
+    const sort = searchParams.get('sort') || "relevance";
     const q = searchParams.get('q');
     const page = +(searchParams.get('page') || "1");
     const page_size = +(searchParams.get('page_size') || "10");
 
     ko.applyBindings(searchModel, document.body);
 
+    searchModel.type(type);
+    searchModel.sort(sort);
+    searchModel.q(q);
+
     if (!q) return;
 
-    const addons_response = await get_json(`https://${host}/api/v3/addons/search?q=${encodeURIComponent(q)}&page=${page}&page_size=${page_size}&lang=${navigator.language}`);
+    const addons_response = await get_json(`https://${host}/api/v3/addons/search?q=${encodeURIComponent(q)}&type=${type}&sort=${sort}&page=${page}&page_size=${page_size}&lang=${navigator.language}`);
     searchModel.page(page);
     searchModel.last_page(Math.ceil(addons_response.count / page_size));
 

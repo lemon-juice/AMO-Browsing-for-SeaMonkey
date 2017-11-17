@@ -21,14 +21,43 @@
             Search
         </h2>
 
-        <form method="get" style="display: flex; flex-direction: row; margin: 10px 0;">
-            <input type="search" name="q" style="flex: 1 0 auto;" />
-            <select name="host" style="margin: 0 0.5em;">
-                <option>addons.mozilla.org</option>
-                <option>addons-dev.allizom.org</option>
-                <option>addons.thunderbird.net</option>
-            </select>
-            <input type="submit" value="Search" />
+        <form method="get">
+            <div style="display: flex; flex-direction: row; margin: 10px 0;">
+                <input type="search" name="q" data-bind="value: q" style="flex: 1 0 auto;" />
+                <select name="host" style="margin-left: 0.5em;">
+                    <option>addons.mozilla.org</option>
+                    <option>addons-dev.allizom.org</option>
+                    <option>addons.thunderbird.net</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; flex-direction: row; margin: 10px 0;">
+                <label>
+                    Type:
+                    <select name="type" data-bind="value: type">
+                        <option value="theme">Complete Themes</option>
+                        <option value="dictionary">Dictionaries</option>
+                        <option value="extension">Extensions</option>
+                        <option value="language">Language Packs</option>
+                        <option value="persona">Lightweight Themes</option>
+                        <option value="search">Search Engines</option>
+                    </select>
+                </label>
+                <label style="margin-left: 0.5em;">
+                    Sort by:
+                    <select name="sort" data-bind="value: sort">
+                        <option value="created">Created</option>
+                        <option value="users">Daily users</option>
+                        <option value="hotness">Hotness</option>
+                        <option value="updated">Last updated</option>
+                        <option value="rating">Rating</option>
+                        <option value="relevance">Relevance</option>
+                        <option value="downloads">Weekly downloads</option>
+                    </select>
+                </label>
+                <div style="flex: 1 0 auto;"></div>
+                <input type="submit" value="Search" />
+            </div>
         </form>
 
         <!-- ko foreach: addons -->

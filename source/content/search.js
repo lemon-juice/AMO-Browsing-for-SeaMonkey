@@ -38,6 +38,9 @@ var searchModel = {
     addons: ko.observableArray(),
     page: ko.observable(),
     last_page: ko.observable(),
+    type: ko.observable(),
+    sort: ko.observable(),
+    q: ko.observable(),
     prev_page_url: ko.pureComputed(function () { return ""; }),
     next_page_url: ko.pureComputed(function () { return ""; }),
     prev: function () { return location.href = searchModel.prev_page_url(); },
@@ -50,19 +53,24 @@ searchModel.next_page_url = ko.pureComputed(function () { return searchModel.pag
     ? replacePageParam(searchModel.page() + 1)
     : ""; });
 window.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-    var searchParams, host, q, page, page_size, addons_response, addons, suite_navbar_links, key, value, link;
+    var searchParams, host, type, sort, q, page, page_size, addons_response, addons, suite_navbar_links, key, value, link;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 searchParams = new URLSearchParams(location.search.substr(1));
                 host = searchParams.get('host') || "addons.mozilla.org";
+                type = searchParams.get('type') || "extension";
+                sort = searchParams.get('sort') || "relevance";
                 q = searchParams.get('q');
                 page = +(searchParams.get('page') || "1");
                 page_size = +(searchParams.get('page_size') || "10");
                 ko.applyBindings(searchModel, document.body);
+                searchModel.type(type);
+                searchModel.sort(sort);
+                searchModel.q(q);
                 if (!q)
                     return [2 /*return*/];
-                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/search?q=" + encodeURIComponent(q) + "&page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language)];
+                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/search?q=" + encodeURIComponent(q) + "&type=" + type + "&sort=" + sort + "&page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language)];
             case 1:
                 addons_response = _a.sent();
                 searchModel.page(page);

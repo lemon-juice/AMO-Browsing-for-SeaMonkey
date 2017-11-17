@@ -56,12 +56,12 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.css" />
-    <Content Include="index.html" />
+    <Content Include="main.css" />
+    <Content Include="versions.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="versions.ts" />
     <TypeScriptCompile Include="knockout.d.ts" />
   </ItemGroup>
   <ItemGroup>
@@ -100,7 +100,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>COPY $(ProjectDir)index.html $(SolutionDir)source\content\versions.html
+    <PostBuildEvent>COPY $(ProjectDir)*.html $(SolutionDir)source\content
 COPY $(ProjectDir)*.js $(SolutionDir)source\content
 COPY $(ProjectDir)*.css $(SolutionDir)source\content
 CD $(SolutionDir)source

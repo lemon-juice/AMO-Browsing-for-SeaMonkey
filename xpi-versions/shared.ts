@@ -82,6 +82,7 @@ class FlatVersion {
     readonly compatibility_display: KnockoutComputed<string>;
 
     readonly app_compatible: KnockoutComputed<boolean>;
+    readonly installable: KnockoutComputed<boolean>;
 
     readonly converter_url: string;
     readonly convertible: KnockoutComputed<boolean>;
@@ -145,6 +146,8 @@ class FlatVersion {
 
             return true;
         });
+
+        this.installable = ko.pureComputed(() => this.app_compatible() || !/SeaMonkey/.test(navigator.userAgent));
 
         this.converter_url = `https://addonconverter.fotokraina.com/?url=${encodeURIComponent(xpi_url)}`;
         this.convertible = ko.pureComputed(() => {

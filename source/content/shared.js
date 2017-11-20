@@ -129,6 +129,7 @@ var FlatVersion = /** @class */ (function () {
                 return false; // No WebExtensions support
             return true;
         });
+        this.installable = ko.pureComputed(function () { return _this.app_compatible() || !/SeaMonkey/.test(navigator.userAgent); });
         this.converter_url = "https://addonconverter.fotokraina.com/?url=" + encodeURIComponent(xpi_url);
         this.convertible = ko.pureComputed(function () {
             if (_this.addon.type != "extension")

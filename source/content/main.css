@@ -26,6 +26,7 @@ header {
 .version {
     border-top: 1px dotted gray;
     padding: 10px;
+    clear: both;
 }
 
 .buttons {

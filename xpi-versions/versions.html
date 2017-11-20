@@ -40,7 +40,7 @@
         <!-- /ko -->
 
         <!-- ko foreach: versions -->
-        <div class="version" data-bind="css: { app_compatible: app_compatible, convertible: convertible }">
+        <div class="version" data-bind="css: { app_compatible: installable, convertible: convertible }">
             <div class="buttons">
                 <!-- ko if: addon.type == 'search' -->
                 <a class="install button" href="#" data-bind="attr: { href: install_url }, click: addSearchProvider">
@@ -51,19 +51,19 @@
                 </a>
                 <!-- /ko -->
                 <!-- ko if: addon.type != 'search' -->
-                <a class="install button" href="#" data-bind="if: app_compatible, attr: { href: install_url }">
+                <a class="install button" href="#" data-bind="if: installable, attr: { href: install_url }">
                     Add to SeaMonkey
                 </a>
                 <a class="convert button" href="#" data-bind="if: convertible, attr: { href: converter_url }">
                     Convert Add-on
                 </a>
-                <div class="not-compatible" data-bind="if: !app_compatible() && !convertible()">
+                <div class="not-compatible" data-bind="if: !installable() && !convertible()">
                     This add-on is not compatible with your version of SeaMonkey.
                     <a href="#" data-bind="attr: { href: download_url }">
                         Download anyway
                     </a>
                 </div>
-                <a class="download button" href="#" data-bind="if: app_compatible() || convertible(), attr: { href: download_url }">
+                <a class="download button" href="#" data-bind="if: installable() || convertible(), attr: { href: download_url }">
                     Download .xpi
                 </a>
                 <!-- /ko -->

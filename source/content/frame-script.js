@@ -23,8 +23,12 @@ var newAmoBr = {
 
   modifyNewSite: function () {
     var addonDetails = content.document.querySelector('.Addon-details');
+    if (!addonDetails) return;
+
+    if (content.document.getElementById('newSiteMessage')) return;
 
     var newSiteMessage = content.document.createElement("div");
+    newSiteMessage.id = "newSiteMessage";
     addonDetails.parentElement.insertBefore(newSiteMessage, addonDetails);
 
     newSiteMessage.textContent = amoBr.getString('viewVersionHistoryFxTB');
@@ -166,7 +170,7 @@ var amoBr = {
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
     if (e.target.defaultView.frameElement // ignore frames
-        || !['https://addons.mozilla.org/', 'https://addons-dev.allizom.org/'].some(s => e.target.defaultView.location.href.indexOf(s) == 0)
+        || !['https://addons.mozilla.org/', 'https://addons-dev.allizom.org/', 'https://addons.thunderbird.net/'].some(s => e.target.defaultView.location.href.indexOf(s) == 0)
         || !content.document.body
         ) {
       return;
@@ -175,9 +179,7 @@ var amoBr = {
     /* Handle new version of AMO */
     if (content.document.getElementById('react-view')) {
       newAmoBr.modifyNewSite();
-      content.window.addEventListener('popstate', function () {
-        newAmoBr.modifyNewSite();
-      });
+      content.window.addEventListener('click', () => newAmoBr.modifyNewSite());
       return;
     }
 

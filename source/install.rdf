@@ -3,7 +3,7 @@
          xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <rdf:Description rdf:about="urn:mozilla:install-manifest">
     <em:id>amobrowsing@seamonkey.mozilla.org</em:id>
-    <em:version>0.10.0a1</em:version>
+    <em:version>0.10.0a2</em:version>
     <em:type>2</em:type>
     <em:bootstrap>true</em:bootstrap>
 
@@ -13,6 +13,15 @@
         <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
         <em:minVersion>2.41</em:minVersion>
         <em:maxVersion>2.53.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+
+    <em:targetApplication>
+      <!-- Firefox Developer Edition (use only for testing, remove before submitting to AMO) -->
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>44.0</em:minVersion>
+        <em:maxVersion>*</em:maxVersion>
       </Description>
     </em:targetApplication>
  

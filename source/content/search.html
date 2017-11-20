@@ -21,7 +21,7 @@
             Search
         </h2>
 
-        <form method="get">
+        <form method="get" id="search-form">
             <div style="display: flex; flex-direction: row; margin: 10px 0;">
                 <input type="search" name="q" data-bind="value: q" style="flex: 1 0 auto;" />
                 <select name="host" data-bind="value: host" style="margin-left: 0.5em;">
@@ -78,7 +78,7 @@
                  data-bind="attr: { src: addon.icon_url }" />
             <div class="version-main">
                 <div class="version-header">
-                    <a href="#" data-bind="attr: { href: 'versions.html?id=' + addon.id }, text: addon.name"></a>
+                    <a href="#" data-bind="attr: { href: 'versions.html?id=' + addon.id + '&host=' + encodeURIComponent($parent.host()) }, text: addon.name"></a>
                     <span class="tags">
                         <span data-bind="if: file.is_restart_required" style="background-color: darkgreen">Restart Required</span>
                         <span data-bind="if: file.is_webextension" style="background-color: red">WebExtensions</span>

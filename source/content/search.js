@@ -55,7 +55,7 @@ searchModel.next_page_url = ko.pureComputed(function () { return searchModel.pag
     ? replacePageParam(searchModel.page() + 1)
     : ""; });
 window.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-    var searchParams, host, type, sort, app, q, page, page_size, url, addons_response, addons, suite_navbar_links, key, value, link;
+    var searchParams, host, type, sort, app, q, page, page_size, form, url, addons_response, addons, suite_navbar_links, key, value, link;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -73,6 +73,15 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                 searchModel.sort(sort);
                 searchModel.app(app);
                 searchModel.q(q);
+                form = document.getElementById("search-form");
+                if (form instanceof HTMLFormElement) {
+                    form.addEventListener("submit", function (e) {
+                        e.preventDefault();
+                        location.href = location.href.substring(0, (location.href + "?").indexOf("?"))
+                            + ("?q=" + encodeURIComponent(searchModel.q()) + "&host=" + encodeURIComponent(searchModel.host()))
+                            + ("&type=" + searchModel.type() + "&sort=" + searchModel.sort() + "&app=" + searchModel.app());
+                    });
+                }
                 if (!q)
                     return [2 /*return*/];
                 url = "https://" + host + "/api/v3/addons/search?q=" + encodeURIComponent(q) + "&type=" + type + "&sort=" + sort + "&page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language;

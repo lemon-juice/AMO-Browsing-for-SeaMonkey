@@ -41,6 +41,16 @@ window.onload = async () => {
     searchModel.app(app);
     searchModel.q(q);
 
+    const form = document.getElementById("search-form");
+    if (form instanceof HTMLFormElement) {
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            location.href = location.href.substring(0, `${location.href}?`.indexOf("?"))
+                + `?q=${encodeURIComponent(searchModel.q())}&host=${encodeURIComponent(searchModel.host())}`
+                + `&type=${searchModel.type()}&sort=${searchModel.sort()}&app=${searchModel.app()}`;
+        });
+    }
+
     if (!q) return;
 
     let url = `https://${host}/api/v3/addons/search?q=${encodeURIComponent(q)}&type=${type}&sort=${sort}&page=${page}&page_size=${page_size}&lang=${navigator.language}`;

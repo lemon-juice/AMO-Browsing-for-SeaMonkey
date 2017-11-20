@@ -41,6 +41,7 @@ var searchModel = {
     host: ko.observable(),
     type: ko.observable(),
     sort: ko.observable(),
+    app: ko.observable(),
     q: ko.observable(),
     prev_page_url: ko.pureComputed(function () { return ""; }),
     next_page_url: ko.pureComputed(function () { return ""; }),
@@ -54,7 +55,7 @@ searchModel.next_page_url = ko.pureComputed(function () { return searchModel.pag
     ? replacePageParam(searchModel.page() + 1)
     : ""; });
 window.onload = function () { return __awaiter(_this, void 0, void 0, function () {
-    var searchParams, host, type, sort, q, page, page_size, addons_response, addons, suite_navbar_links, key, value, link;
+    var searchParams, host, type, sort, app, q, page, page_size, url, addons_response, addons, suite_navbar_links, key, value, link;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -62,6 +63,7 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                 host = searchParams.get('host') || "addons.mozilla.org";
                 type = searchParams.get('type') || "extension";
                 sort = searchParams.get('sort') || "relevance";
+                app = searchParams.get('app') || "";
                 q = searchParams.get('q');
                 page = +(searchParams.get('page') || "1");
                 page_size = +(searchParams.get('page_size') || "10");
@@ -69,10 +71,14 @@ window.onload = function () { return __awaiter(_this, void 0, void 0, function (
                 searchModel.host(host);
                 searchModel.type(type);
                 searchModel.sort(sort);
+                searchModel.app(app);
                 searchModel.q(q);
                 if (!q)
                     return [2 /*return*/];
-                return [4 /*yield*/, get_json("https://" + host + "/api/v3/addons/search?q=" + encodeURIComponent(q) + "&type=" + type + "&sort=" + sort + "&page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language)];
+                url = "https://" + host + "/api/v3/addons/search?q=" + encodeURIComponent(q) + "&type=" + type + "&sort=" + sort + "&page=" + page + "&page_size=" + page_size + "&lang=" + navigator.language;
+                if (app)
+                    url += "&app=" + encodeURIComponent(app);
+                return [4 /*yield*/, get_json(url)];
             case 1:
                 addons_response = _a.sent();
                 searchModel.page(page);

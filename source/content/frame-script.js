@@ -381,7 +381,7 @@ var amoBr = {
   /* Handle DOMContentLoaded event */
   handleEvent: function(e) {
     if (e.target.defaultView.frameElement // ignore frames
-        || !['https://addons.mozilla.org/', 'https://addons-dev.allizom.org/'].some(s => e.target.defaultView.location.href.indexOf(s) == 0)
+        || !['https://addons.mozilla.org/', 'https://addons-dev.allizom.org/', 'https://addons.thunderbird.net/'].some(s => e.target.defaultView.location.href.indexOf(s) == 0)
         || !content.document.body
         ) {
       return;

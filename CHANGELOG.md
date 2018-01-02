@@ -22,3 +22,20 @@ v0.9.17
 	* Otherwise, AMO's API will be used to offer possible replacements. (This API is designed to offer WebExtensions replacements for legacy extensions; here we're using it in reverse.)
 * On the old Firefox Add-ons site, the add-on details page will now show the same message that is shown on the new site. Users no longer have to click the button to check whether a SeaMonkey version is available.
 * The AMO development environment (addons-dev.allizom.org) is now supported too.
+
+v0.10
+-----
+
+This version marks a change in how Firefox and Thunderbird add-ons are handled.
+
+Instead of an install button, add-on details pages now have a button (or link)
+that reads "View Version History." This link takes you to a new page, which
+lists the most recent versions of an add-on, and offers install, convert,
+and/or download buttons when appropriate. For example, for a Firefox
+extension, you can use this page to check whether older, non-WebExtensions
+versions exist, and try to install them.
+
+The extension also includes its own alternate search page; click the link
+labeled "use the AMO Browsing extension to search" under AMO's search box.
+This type of search includes Firefox, Thunderbird, and SeaMonkey extensions.
+(You can also keep using the search page on AMO if you prefer.)

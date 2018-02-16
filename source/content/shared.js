@@ -140,6 +140,12 @@ var FlatVersion = /** @class */ (function () {
                 return false;
             return !_this.file.is_webextension;
         });
+        this.icon_url = ko.pureComputed(function () {
+            var icons = _this.addon.icons || {};
+            return icons["64"]
+                || _this.addon.icon_url
+                || null;
+        });
     }
     FlatVersion.prototype.addSearchProvider = function () {
         window.external.AddSearchProvider(this.install_url);

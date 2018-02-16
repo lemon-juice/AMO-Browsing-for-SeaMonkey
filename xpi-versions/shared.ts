@@ -19,6 +19,8 @@ interface Addon {
     name: string;
     type: "theme" | "search" | "persona" | "language" | "extension" | "dictionary";
     url: string;
+    icon_url?: string;
+    icons?: { [size: string]: string };
 }
 
 interface AmoVersion {
@@ -86,6 +88,8 @@ class FlatVersion {
 
     readonly converter_url: string;
     readonly convertible: KnockoutComputed<boolean>;
+
+    readonly icon_url: KnockoutComputed<string | null>;
 
     constructor(readonly addon: Addon, readonly version: AmoVersion) {
         this.file = [
@@ -157,6 +161,14 @@ class FlatVersion {
             if (this.strict) return false;
 
             return !this.file.is_webextension;
+        });
+
+        this.icon_url = ko.pureComputed(() => {
+            const icons = this.addon.icons || {};
+            return icons["64"]
+                || icons["32"]
+                || this.addon.icon_url
+                || null;
         });
     }
 

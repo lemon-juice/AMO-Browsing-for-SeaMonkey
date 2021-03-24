@@ -13,6 +13,6 @@ require WebExtensions.
 Add-ons that use WebExtensions are not compatible with SeaMonkey, but you
 might be able to find older, non-WebExtensions versions that will work.
 
-Download from AMO: https://addons.mozilla.org/en-US/seamonkey/addon/amo-browsing-for-seamonkey/
+Download: https://addons.thunderbird.net/en-US/seamonkey/addon/amo-browsing-for-seamonkey/
 
 mozillaZine thread: http://forums.mozillazine.org/viewtopic.php?f=40&t=2834855
